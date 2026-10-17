@@ -6,23 +6,14 @@ banner:
 ---
 
 import Figure from '../../components/Figure.astro';
-import FamilyDiagramPlaceholder from '../../components/FamilyDiagramPlaceholder.astro';
+import Family from '@agentplot/site-theme/Family.astro';
 import { surfacesSvg } from '../../diagrams/surfaces';
 
 headwater is one of a family of tools that turn what happens outside a
 repository into work that lands in it. Each tool stands alone, and each
 one's site is its own.
 
-<FamilyDiagramPlaceholder highlight="headwater" />
-
-- **headwater** reports releases and advisories for what a repository
-  declares.
-- **eddy** lists recorded meetings from each meeting service.
-- **millpond** is the inbox. It records each capture once, keeps what it
-  is made from, and serves the tools a curation session works through.
-- **Flywheel** plans the work and runs the teams that make it.
-- **[sluice](https://agentplot.github.io/sluice/)** tests each change as
-  it would land, and lands it.
+<Family highlight="headwater" />
 
 ## Alone, or feeding an inbox
 

@@ -1,5 +1,7 @@
 /* The diagrams' palette, in both themes. Every diagram draws with these
-   tokens and nothing else, so it follows the site's theme toggle. */
+   tokens and nothing else, so it follows the site's theme toggle. The accent
+   and sluice's green are the family theme's; an advisory is amber, apart
+   from headwater's coral. */
 :root {
   --d-bg: #12161d;
   --d-panel: #1a1f28;
@@ -8,12 +10,12 @@
   --d-faint: #5d6370;
   --d-rule: #2e3440;
   --d-soft: #222833;
-  --d-accent: var(--hw-accent);
-  --d-accent-soft: color-mix(in srgb, var(--hw-accent) 20%, transparent);
+  --d-accent: var(--ap-accent);
+  --d-accent-soft: color-mix(in srgb, var(--ap-accent) 20%, transparent);
   --d-on-accent: #0e1116;
-  --d-ok: var(--hw-sluice);
-  --d-bad: #f08a7e;
-  --d-bad-soft: color-mix(in srgb, #f08a7e 18%, transparent);
+  --d-ok: var(--ap-ok);
+  --d-bad: #e9b44c;
+  --d-bad-soft: color-mix(in srgb, #e9b44c 16%, transparent);
   --d-shadow: rgb(0 0 0 / 0.45);
 }
 
@@ -26,7 +28,7 @@
   --d-rule: #d3d0c6;
   --d-soft: #e1ded5;
   --d-on-accent: #ffffff;
-  --d-bad: #c0392b;
-  --d-bad-soft: color-mix(in srgb, #c0392b 14%, transparent);
+  --d-bad: #8a5a00;
+  --d-bad-soft: color-mix(in srgb, #b07a10 14%, transparent);
   --d-shadow: rgb(40 36 20 / 0.18);
 }

@@ -3,6 +3,6 @@
   <path d="M16 60 H108" fill="none" stroke="#0E1116" stroke-width="6" stroke-linecap="round" opacity=".45"/>
   <circle cx="24" cy="60" r="7" fill="#0E1116" opacity=".6"/>
   <path d="M46 28 V92" fill="none" stroke="#0E1116" stroke-width="7" stroke-linecap="round"/>
-  <circle cx="72" cy="60" r="10" fill="#1A6BB5"/>
-  <circle cx="100" cy="60" r="10" fill="#1A6BB5"/>
+  <circle cx="72" cy="60" r="10" fill="#A8442A"/>
+  <circle cx="100" cy="60" r="10" fill="#A8442A"/>
 </svg>
