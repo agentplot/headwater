@@ -1,8 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="6 16 112 88" width="112" height="88" role="img" aria-label="headwater">
   <title>headwater</title>
-  <path d="M16 60 H108" fill="none" stroke="#0E1116" stroke-width="6" stroke-linecap="round" opacity=".45"/>
-  <circle cx="24" cy="60" r="7" fill="#0E1116" opacity=".6"/>
-  <path d="M46 28 V92" fill="none" stroke="#0E1116" stroke-width="7" stroke-linecap="round"/>
-  <circle cx="72" cy="60" r="10" fill="#A8442A"/>
-  <circle cx="100" cy="60" r="10" fill="#A8442A"/>
+  <path d="M14 60 H114" fill="none" stroke="#0E1116" stroke-width="8" stroke-linecap="round" opacity=".5"/>
+  <circle cx="18" cy="60" r="9" fill="#0E1116" opacity=".75"/>
+  <path d="M42 22 V98" fill="none" stroke="#0E1116" stroke-width="11" stroke-linecap="round"/>
+  <circle cx="70" cy="60" r="15" fill="#A8442A"/>
+  <circle cx="102" cy="60" r="15" fill="#A8442A"/>
 </svg>
