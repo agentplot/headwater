@@ -214,7 +214,8 @@ export function heroSvg(layout: Layout): string {
       // Where the pin was, and the way it went.
       L.show('ghost', 67, 96);
       add(`<g class="ghost"><line class="pinline" x1="${px}" y1="${tr.y - 18}" x2="${px}" y2="${tr.y + 9}" stroke-dasharray="3 3" opacity=".55"/>`);
-      add(`<path class="moved" d="M${px + 4},${tr.y - 36} H${px + dx - 22}"/><path class="movedhead" d="M${px + dx - 24},${tr.y - 40} L${px + dx - 16},${tr.y - 36} L${px + dx - 24},${tr.y - 32} Z"/></g>`);
+      const ay = tr.y - (layout === 'wide' ? 36 : 30);
+      add(`<path class="moved" d="M${px + 4},${ay} H${px + dx - 22}"/><path class="movedhead" d="M${px + dx - 24},${ay - 4} L${px + dx - 16},${ay} L${px + dx - 24},${ay + 4} Z"/></g>`);
     }
     add(`<g class="pm${i}"><g class="${mover.trim()}"><line class="pinline" x1="${px}" y1="${tr.y - 18}" x2="${px}" y2="${tr.y + 9}"/>`);
     add(`<circle class="pinring" cx="${px}" cy="${tr.y}" r="8.5"/>`);
