@@ -32,6 +32,14 @@ outside its profiles.
 | B | Its contracts across five seams: a dependency description, a release source, a notes source, an advisory source and a store | 40 to 52 |
 | C | The profiles that satisfy each contract: Package URL identities, the declarations it reads, deps.dev, each registry's API, GitHub releases, ecosyste.ms, OSV, and the git directory as its store | |
 
+The capture design in the same repository settles three changes the
+statement takes up when it is amended (step H1 of the
+[roadmap](/headwater/roadmap/)): each ecosystem's package manager, run
+read-only in the repository's shell, is the first lookup, with deps.dev
+where none runs; each release is marked inside or outside the range its
+declaration gives; and a brief names the ecosystem's own command for the
+move, amending clause 27, and can carry the published package's diff.
+
 ## The invariants
 
 | | |

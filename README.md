@@ -18,11 +18,22 @@ change is theirs.
 - **Reads declarations** a repository already has: npm, Python, Cargo, Go,
   mise, GitHub Actions, container images, and a watch list for tools no
   manifest names.
-- **Asks lookups in batches**: deps.dev, GitHub, ecosyste.ms, each registry's
-  own API, and OSV for advisories. A lookup learns the identities and
-  versions asked about, and nothing else of the repository.
+- **Asks each package manager first**, read-only in the repository's own
+  shell, so private registries answer too: `npm view` and `npm outdated`,
+  `go list -m -versions`, `mise ls-remote`, and the configured registry's
+  index for Python and Cargo. GitHub answers for tools no package manager
+  names, deps.dev and ecosyste.ms where none runs, and OSV for advisories.
+  A registry or a lookup learns the identities and versions asked about,
+  and nothing else of the repository.
+- **Marks each release inside or outside the declared range.** Inside, only
+  the lockfile moves; outside, the manifest does, as a major release needs.
+  Both are reported, so a major release is never hidden.
 - **Reports upstream's words whole.** Notes arrive as upstream wrote them, and
   no model reads them inside headwater. Advisories stand apart from notes.
+- **Gives a brief for each release**, naming the ecosystem's own command for
+  the move (`npm update`, `uv lock --upgrade-package`, `cargo update -p`,
+  `go get`, `mise use`), which whoever makes the change runs; headwater
+  never does.
 - **Scans what matters most more often.** A repository names tiers of its
   dependencies, each with a cadence; a scan reaches the sources of the tiers
   that are due.

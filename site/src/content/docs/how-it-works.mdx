@@ -1,30 +1,39 @@
 ---
 title: How it works
-description: How headwater reads a repository, asks its lookups, decides what is new, and keeps what it needs to answer again.
+description: How headwater reads a repository, asks each package manager and its lookups, decides what is new, and keeps what it needs to answer again.
 ---
 
 import Figure from '../../components/Figure.astro';
 import Batches from '../../components/Batches.astro';
 import { tiersSvg } from '../../diagrams/tiers';
 import { advisorySvg } from '../../diagrams/advisory';
+import { rangesSvg } from '../../diagrams/ranges';
 
 headwater answers one question about a repository: which releases of what
 it depends on are newer than what it runs. It reads, it asks, it reports,
 and it keeps only what it needs to answer again. Numbers in parentheses
-cite clauses of [the statement](/headwater/design/).
+cite clauses of [the statement](/headwater/design/). The package manager
+as the first lookup, the declared range and the brief's command are
+settled in the capture design, and enter the statement when it is
+amended.
 
-## One scan, few requests
+## Asked where the repository asks
 
 headwater reads every declaration the repository holds and gives each
 dependency one identity, a Package URL such as `pkg:npm/react`, whichever
-file names it (2). It then asks each lookup about many identities at
-once. deps.dev takes the npm, PyPI and Cargo packages in one request;
-GitHub takes every repository hosted there, fifty to a query, through
-your own `gh` sign-in; OSV takes every pin in one batched query. A lookup
-learns the identities and versions headwater asks about, and nothing else
-of the repository (37).
+file names it (2). It asks each ecosystem's own package manager first,
+read-only, in the repository's own shell, so it sees the registries the
+repository is configured for, private ones among them: `npm view` and
+`npm outdated`, `go list -m -versions`, `mise ls-remote`, and the
+configured registry's index for Python and Cargo. GitHub answers for the
+tools no package manager names, fifty repositories to a query through
+your own `gh` sign-in. deps.dev and ecosyste.ms answer where no package
+manager runs or none exists, and OSV answers which advisories name each
+pin, every pin in one query. A registry or a lookup learns the identities
+and versions headwater asks about, and nothing else of the repository
+(37).
 
-<Batches>Forty-seven dependencies from five kinds of declaration, three requests. A dependency whose source does not answer comes home unread, with the reason.</Batches>
+<Batches>Forty-seven dependencies from five kinds of declaration, three lookups. A dependency whose source does not answer comes home unread, with the reason.</Batches>
 
 ## The pin decides what is new
 
@@ -38,6 +47,16 @@ reported as undecided, beside the newer ones (7).
 headwater reads no record of what it reported before. Every scan reports
 a release until the pin reaches it, so a bump that lands is the only
 thing that clears one, and no one has to mark it done (9).
+
+## Inside the range or outside it
+
+A declaration names a range as well as a pin: `^1.4`, `>=1.4,<2`. headwater
+marks each newer release inside or outside it. The package manager takes
+a release inside the range by changing only the lockfile. A release
+outside it changes the manifest, as a major release needs. headwater
+reports both, so a major release is never hidden.
+
+<Figure wide={rangesSvg('wide')} tall={rangesSvg('tall')} />
 
 ## Scanned as often as it matters
 
@@ -69,9 +88,16 @@ advisory's range, the advisory no longer names it.
 For any release a report holds, headwater gives a brief: the release, its
 notes whole, its advisories, and every declaration of the dependency with
 the pin each gives, so a fixer can move every one (26). The brief names
-no tool and prescribes no step (27). The fixer, a coding agent or a
-person, decides whether to make the change, and the repository's own gate
-decides whether it lands.
+the ecosystem's own command for the move: `npm update` or
+`npm install <name>@<version>`, `uv lock --upgrade-package`,
+`cargo update -p`, `go get`, `mise use`. Whoever makes the change runs
+it, and headwater never does. Beside the notes, a brief can carry the
+published package's own diff between the pin and the release
+(`npm diff`), so a README or CHANGELOG change shows as upstream shipped
+it.
+
+The fixer, a coding agent or a person, decides whether to make the
+change, and the repository's own gate decides whether it lands.
 
 ## What headwater keeps
 

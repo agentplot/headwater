@@ -1,6 +1,7 @@
-// The start page's diagram: headwater reads the declarations, asks the
-// lookups, reports every release newer than each pin, and a landed bump
-// moves the pin so its releases leave the report. One claim: the pin alone
+// The start page's diagram: headwater reads the declarations, asks each
+// package manager first and the lookups after it, reports every release
+// newer than each pin, inside its declared range or outside it, and a landed
+// bump moves the pin so its releases leave the report. One claim: the pin alone
 // decides what is new (headwater 9). Drawn twice, wide and tall, from the same
 // timeline; Figure.astro shows the one that fits.
 import { BASE, Loop, esc, scope } from './loop';
@@ -12,20 +13,22 @@ const T = 18;
 // landed, the pin has moved, and react's two releases are struck through.
 const STILL = 0.78 * T;
 
+// Each dependency's declared range, and the first release outside it: a
+// release past the range moves the manifest, one inside moves the lockfile.
 const deps = [
-  { file: 'Cargo.toml', name: 'serde', id: 'pkg:cargo/serde', pin: 3, versions: ['1.0.219', '1.0.225', '1.0.226', '1.0.227', '1.0.228'] },
-  { file: 'pyproject.toml', name: 'fastapi', id: 'pkg:pypi/fastapi', pin: 3, versions: ['0.116.1', '0.117.0', '0.117.1', '0.118.0', '0.119.0'] },
-  { file: 'package.json', name: 'react', id: 'pkg:npm/react', pin: 2, versions: ['18.3.1', '19.0.0', '19.1.0', '19.2.0', '19.2.1'] },
+  { file: 'Cargo.toml', name: 'serde', id: 'pkg:cargo/serde', range: '^1.0', pin: 3, outside: 99, versions: ['1.0.219', '1.0.225', '1.0.226', '1.0.227', '1.0.228'] },
+  { file: 'pyproject.toml', name: 'fastapi', id: 'pkg:pypi/fastapi', range: '~=0.118.0', pin: 3, outside: 4, versions: ['0.116.1', '0.117.0', '0.117.1', '0.118.0', '0.119.0'] },
+  { file: 'package.json', name: 'react', id: 'pkg:npm/react', range: '^19.1.0', pin: 2, outside: 99, versions: ['18.3.1', '19.0.0', '19.1.0', '19.2.0', '19.2.1'] },
 ];
 const BUMPED = 2; // react
 const BUMP_TO = 4; // 19.2.1
 
 // Each release newer than its pin, in the report's order.
-const report = deps.flatMap((d, i) => d.versions.map((v, k) => ({ i, k, name: d.name, v })).filter((r) => r.k > d.pin));
+const report = deps.flatMap((d, i) => d.versions.map((v, k) => ({ i, k, name: d.name, v, outside: k >= d.outside })).filter((r) => r.k > d.pin));
 
 const caps: Array<[string, string, number, number]> = [
   ['headwater reads what', 'the repository declares.', 2, 16],
-  ['It asks where each', 'dependency is published.', 16, 36],
+  ['It asks each package manager', 'first, then the lookups.', 16, 36],
   ['Every release newer than', 'its pin is reported.', 36, 56],
   ['A bump lands, the pin moves,', 'and its releases leave.', 56, 96],
 ];
@@ -36,7 +39,7 @@ interface Geo {
   heads: Array<[string, number, number]>;
   card: (i: number) => { x: number; y: number; w: number; h: number };
   cardText: { file: number; name: number; pin: number; pad: number; nameCls: string };
-  band: { x: number; y: number; w: number; h: number; labels: Array<[string, number, number]> };
+  band: { x: number; y: number; w: number; h: number; labels: Array<[string, number, number, string?]> };
   chipFrom: (i: number) => [number, number];
   chipTo: (i: number) => [number, number];
   chipFont: number;
@@ -49,6 +52,8 @@ interface Geo {
   arrow: string;
   pill: { x: number; y: number; w: number };
   cap: (n: number) => { x: number; y: number; one: boolean };
+  legend: [number, number, number, number];
+  cardRange: boolean;
 }
 
 const wide: Geo = {
@@ -68,9 +73,11 @@ const wide: Geo = {
     w: 112,
     h: 260,
     labels: [
-      ['deps.dev', 300, 84],
-      ['GitHub', 300, 156],
-      ['ecosyste.ms', 300, 248],
+      ['npm · uv · cargo', 300, 79, 't b'],
+      ['in its own shell', 300, 91, 'f'],
+      ['deps.dev', 300, 150],
+      ['GitHub', 300, 166],
+      ['ecosyste.ms', 300, 250],
       ['OSV', 300, 316],
     ],
   },
@@ -86,16 +93,18 @@ const wide: Geo = {
   arrow: 'M117,334 L123,325 L129,334 Z',
   pill: { x: 448, y: 362, w: 132 },
   cap: (n) => ({ x: 20 + n * 218, y: 408, one: false }),
+  legend: [376, 334, 214, 0],
+  cardRange: true,
 };
 
 const tall: Geo = {
   W: 372,
-  H: 728,
+  H: 760,
   heads: [
     ['THE REPOSITORY', 12, 26],
     ['LOOKUPS', 12, 128],
-    ['RELEASES IN VERSION ORDER', 12, 224],
-    ['THE REPORT', 12, 444],
+    ['RELEASES IN VERSION ORDER', 12, 236],
+    ['THE REPORT', 12, 476],
   ],
   card: (i) => ({ x: 12 + i * 112, y: 36, w: 100, h: 72 }),
   cardText: { file: 19, name: 39, pin: 59, pad: 10, nameCls: 'sm b' },
@@ -103,26 +112,26 @@ const tall: Geo = {
     x: 12,
     y: 136,
     w: 336,
-    h: 62,
+    h: 74,
     labels: [
-      ['deps.dev', 58, 188],
-      ['GitHub', 138, 188],
-      ['ecosyste.ms', 224, 188],
-      ['OSV', 306, 188],
+      ['npm · uv · cargo, in the repository’s own shell', 180, 186, 't b'],
+      ['then deps.dev · GitHub · ecosyste.ms · OSV', 180, 201],
     ],
   },
   chipFrom: (i) => [62 + i * 112, 96],
   chipTo: (i) => [62 + i * 112, 158],
   chipFont: 9,
-  track: (i) => ({ x1: 20, x2: 344, y: 264 + i * 62, tick: (k) => 36 + k * 72, label: [20, 264 + i * 62 - 20] }),
-  count: { x: 348, y: 444, anchor: 'end' },
-  rchip: (j) => ({ x: 12 + (j % 2) * 174, y: 456 + Math.floor(j / 2) * 38, w: 162, h: 30 }),
-  fixer: { x: 12, y: 538, w: 336, h: 32 },
-  bumpPath: 'M180,570 V590 H360 V72 H344',
-  bumpLen: 20 + 180 + 518 + 16,
+  track: (i) => ({ x1: 20, x2: 344, y: 276 + i * 62, tick: (k) => 36 + k * 72, label: [20, 276 + i * 62 - 20] }),
+  count: { x: 348, y: 476, anchor: 'end' },
+  rchip: (j) => ({ x: 12 + (j % 2) * 174, y: 488 + Math.floor(j / 2) * 38, w: 162, h: 30 }),
+  fixer: { x: 12, y: 570, w: 336, h: 32 },
+  bumpPath: 'M180,602 V622 H360 V72 H344',
+  bumpLen: 20 + 180 + 550 + 16,
   arrow: 'M347,66 L338,72 L347,78 Z',
-  pill: { x: 262, y: 590, w: 120 },
-  cap: (n) => ({ x: 12, y: 632 + n * 26, one: true }),
+  pill: { x: 262, y: 622, w: 120 },
+  cap: (n) => ({ x: 12, y: 664 + n * 26, one: true }),
+  legend: [12, 444, 0, 15],
+  cardRange: false,
 };
 
 export function heroSvg(layout: Layout): string {
@@ -137,7 +146,7 @@ export function heroSvg(layout: Layout): string {
   const b = g.band;
   L.hold('bandglow', 'stroke', [[0, 'transparent'], [19, 'var(--d-accent)'], [29, 'transparent']]);
   add(`<rect class="band bandglow" x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" rx="8" stroke-width="1.5"/>`);
-  for (const [t, x, y] of b.labels) add(`<text class="mono xxs m" x="${x}" y="${y}" text-anchor="middle">${t}</text>`);
+  for (const [t, x, y, cls = 'm'] of b.labels) add(`<text class="mono xxs ${cls}" x="${x}" y="${y}" text-anchor="middle">${t}</text>`);
 
   // The declarations: one card per dependency, lit while it is read.
   deps.forEach((d, i) => {
@@ -152,6 +161,7 @@ export function heroSvg(layout: Layout): string {
     add(`<rect class="card cd${i}" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="7"/>`);
     add(`<text class="mono xxs m" x="${c.x + ct.pad}" y="${c.y + ct.file}">${d.file}</text>`);
     add(`<text class="${ct.nameCls}" x="${c.x + ct.pad}" y="${c.y + ct.name}">${d.name}</text>`);
+    if (g.cardRange) add(`<text class="mono xxs m" x="${c.x + c.w - 14}" y="${c.y + ct.name}" text-anchor="end">${d.range}</text>`);
     add(`<text class="mono xs m" x="${c.x + ct.pad}" y="${c.y + ct.pin}">pin</text>`);
     const vx = c.x + ct.pad + 28;
     if (i === BUMPED) {
@@ -179,7 +189,7 @@ export function heroSvg(layout: Layout): string {
     ]);
     if (tr.label) {
       L.show(`tl${i}`, t0, 96);
-      add(`<text class="xs b tl${i}" x="${tr.label[0]}" y="${tr.label[1]}">${d.name}</text>`);
+      add(`<text class="xs b tl${i}" x="${tr.label[0]}" y="${tr.label[1]}">${d.name}<tspan class="mono xxs m" dx="8">${d.range}</tspan></text>`);
     }
     // What is newer than the pin, shaded from the pin to the line's end.
     const px = tr.tick(d.pin);
@@ -200,7 +210,10 @@ export function heroSvg(layout: Layout): string {
         L.hold(`tf${i}${k}`, 'fill', pts);
         fill = ` tf${i}${k}`;
       }
-      add(`<g class="tk${i}${k}"><circle class="tick${fill}" cx="${x}" cy="${tr.y}" r="5"/>`);
+      if (newer && k >= d.outside) {
+        L.hold(`to${i}${k}`, 'stroke', [[0, 'var(--d-faint)'], [37 + i, 'var(--d-accent)'], [97, 'var(--d-faint)']]);
+        add(`<g class="tk${i}${k}"><circle class="tickout to${i}${k}" cx="${x}" cy="${tr.y}" r="5"/>`);
+      } else add(`<g class="tk${i}${k}"><circle class="tick${fill}" cx="${x}" cy="${tr.y}" r="5"/>`);
       add(`<text class="mono xxs m" x="${x}" y="${tr.y + 21}" text-anchor="middle">${v}</text></g>`);
     });
     // The pin: a ring on its release, moved only by the bump.
@@ -275,8 +288,9 @@ export function heroSvg(layout: Layout): string {
         : [[0, dx, dy, 0], [a, dx, dy, 0], [a + 0.4, dx, dy, 1], [a + 3.5, 0, 0, 1], [96, 0, 0, 1], [97, 0, 0, 0], [100, dx, dy, 0]];
     L.path(`rc${j}`, pts);
     add(`<g class="rc${j}"><rect class="rchip" x="${c.x}" y="${c.y}" width="${c.w}" height="${c.h}" rx="6"/>`);
-    add(`<rect class="acc" x="${c.x}" y="${c.y}" width="4" height="${c.h}" rx="2"/>`);
-    add(`<text class="sm b" x="${c.x + 14}" y="${c.y + 20}">${r.name}</text>`);
+    if (r.outside) add(`<rect class="barout" x="${c.x + 1}" y="${c.y + 1}" width="4" height="${c.h - 2}" rx="2"/>`);
+    else add(`<rect class="acc" x="${c.x}" y="${c.y}" width="4" height="${c.h}" rx="2"/>`);
+    add(`<text class="sm b" x="${c.x + 14}" y="${c.y + 20}">${r.name}${r.outside && layout === 'wide' ? '<tspan class="xxs m" dx="8" font-weight="400">outside its range</tspan>' : ''}</text>`);
     add(`<text class="mono xs acc" x="${c.x + c.w - 12}" y="${c.y + 20}" text-anchor="end">${r.v}</text>`);
     if (r.i === BUMPED) {
       L.show(`st${j}`, 72, 96);
@@ -284,6 +298,12 @@ export function heroSvg(layout: Layout): string {
     }
     add('</g>');
   });
+
+  // The legend: a newer release inside its range, or outside it.
+  const [gx, gy, dx2, dy2] = g.legend;
+  L.show('legend', 37, 96);
+  add(`<g class="legend"><circle class="acc" cx="${gx + 5}" cy="${gy - 4}" r="5"/><text class="xxs t" x="${gx + 16}" y="${gy}">inside its range: the lockfile moves</text>`);
+  add(`<circle class="tickout legendout" cx="${gx + dx2 + 5}" cy="${gy + dy2 - 4}" r="5"/><text class="xxs t" x="${gx + dx2 + 16}" y="${gy + dy2}">outside it: the manifest moves</text></g>`);
 
   // The captions: the one that is happening, the rest dimmed.
   caps.forEach(([l1, l2, a, z], n) => {
@@ -299,6 +319,8 @@ export function heroSvg(layout: Layout): string {
     BASE +
       `.track{stroke:var(--d-rule);stroke-width:2;stroke-linecap:round}
 .tick{fill:var(--d-faint)}
+.tickout{fill:var(--d-bg);stroke:var(--d-faint);stroke-width:2} .legendout{stroke:var(--d-accent)}
+.barout{fill:none;stroke:var(--d-accent);stroke-width:1.5}
 .newer{fill:var(--d-accent-soft)}
 .pinline{stroke:var(--d-fg);stroke-width:2.5;stroke-linecap:round}
 .pinring{fill:none;stroke:var(--d-fg);stroke-width:2.5}
@@ -319,7 +341,7 @@ export function heroSvg(layout: Layout): string {
 
   const title = 'headwater: the pin decides what is new';
   const desc =
-    'A repository declares serde 1.0.227 in Cargo.toml, fastapi 0.118.0 in pyproject.toml and react 19.1.0 in package.json. headwater reads the declarations and sends only each identity to the lookups: deps.dev, GitHub, ecosyste.ms and OSV. Each answer is a line of releases in version order with the pin marked, and every release past the pin is newer: serde 1.0.228, fastapi 0.119.0, react 19.2.0 and 19.2.1, four in the report. A fixer bumps react to 19.2.1 and sluice lands it. The pin in package.json moves to 19.2.1, the ring on react’s line moves with it, and react’s two releases leave the report, which now holds two.';
+    'A repository declares serde ^1.0 in Cargo.toml, pinned at 1.0.227; fastapi ~=0.118.0 in pyproject.toml, pinned at 0.118.0; and react ^19.1.0 in package.json, pinned at 19.1.0. headwater reads the declarations and asks each package manager first, npm, uv and cargo, read-only in the repository’s own shell, with deps.dev, GitHub, ecosyste.ms and OSV after them. Each answer is a line of releases in version order with the pin marked, and every release past the pin is newer: serde 1.0.228, fastapi 0.119.0, react 19.2.0 and 19.2.1, four in the report. fastapi 0.119.0 is outside its declared range, so taking it moves the manifest; the others move only the lockfile. A fixer bumps react to 19.2.1 and sluice lands it. The pin in package.json moves to 19.2.1, the ring on react’s line moves with it, and react’s two releases leave the report, which now holds two.';
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${g.W} ${g.H}" class="root" role="img" aria-labelledby="ttl dsc">` +
     `<title id="ttl">${title}</title><desc id="dsc">${esc(desc)}</desc><style>${style}</style>` +

@@ -28,11 +28,12 @@ Pages workflow builds once the dependency names its GitHub tag.
 |---|---|
 | `src/styles/diagrams.css` | the diagrams' palette, the only colours a diagram draws with: the family's tokens, headwater's accent, `--ap-accent`, and the theme's warning colour, `--ap-warn`, for an advisory |
 | `src/diagrams/loop.ts` | the diagrams' animation: one CSS keyframe loop per drawing, a still frame for reduced motion, every class scoped to its drawing |
-| `src/diagrams/hero.ts` | the start page: the pin decides what is new |
+| `src/diagrams/hero.ts` | the start page: the pin decides what is new, each release inside or outside its declared range |
+| `src/diagrams/ranges.ts` | how it works: inside the range only the lockfile moves, outside it the manifest does, and both are reported |
 | `src/diagrams/tiers.ts` | how it works: a scan reaches only the sources of tiers that are due |
 | `src/diagrams/advisory.ts` | how it works: an advisory stays beside the releases while it names the pin |
 | `src/diagrams/surfaces.ts` | how it fits: one core, every surface, alone or feeding an inbox |
-| `src/components/Batches.astro` | how it works, on a canvas: one scan, three requests |
+| `src/components/Batches.astro` | how it works, on a canvas: each dependency asked where the repository asks, its package manager first |
 | `src/components/Figure.astro` | a diagram drawn wide and tall, the tall one on a phone |
 | `scripts/shots.mjs` | screenshots of every page at 1280 and 390 pixels in both themes, each diagram's still, and frames of each loop |
 

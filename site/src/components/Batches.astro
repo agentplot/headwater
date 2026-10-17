@@ -1,7 +1,9 @@
 ---
-// How it works: one scan asks each lookup in batches. Forty-seven
-// dependencies from five kinds of declaration go to three lookups as three
-// requests, and come home marked with what the lookups said. Drawn on a
+// How it works: each dependency is asked where the repository itself would
+// ask. Forty-seven dependencies from five kinds of declaration go to their
+// package managers, read-only in the repository's own shell, to GitHub for
+// what no package manager names, and every pin to OSV in one query, and come
+// home marked with what each said. Drawn on a
 // canvas, since every dependency moves on its own path. The positions are a
 // function of the time in the loop, so the reduced-motion still and a
 // screenshot's frame are exact (the hw:frame event sets one).
@@ -10,7 +12,7 @@
 <figure class="hw-canvas not-content">
   <canvas
     role="img"
-    aria-label="Forty-seven dependencies, declared in package.json, pyproject.toml, Cargo.toml, the workflows and a watch list, gather into batches. The npm, PyPI and Cargo identities go to deps.dev as one request of twenty-eight; the workflows' actions and the watch list's tools go to GitHub as one query of nineteen repositories. Each answer comes back and the dependencies return home, ten of them marked as having a newer release. Then every pin goes to OSV as one batched query, and two dependencies come back marked as named by an advisory. Forty-seven dependencies, three requests."
+    aria-label="Forty-seven dependencies, declared in package.json, pyproject.toml, Cargo.toml, the workflows and a watch list, gather into batches. The twenty-eight npm, PyPI and Cargo packages go to their own package managers, npm, uv and cargo, run read-only in the repository's shell, with deps.dev where none runs; the nineteen repositories behind the workflows' actions and the watch list's tools go to GitHub in one query. Each answer comes back and the dependencies return home, ten of them marked as having a newer release. Then every pin goes to OSV in one query, and two dependencies come back marked as named by an advisory. Forty-seven dependencies, three lookups."
   ></canvas>
   <figcaption><slot /></figcaption>
 </figure>
@@ -49,7 +51,12 @@
     { label: 'workflows', n: 5, to: 1, newer: [0, 4], adv: [] },
     { label: 'watch list', n: 14, to: 1, newer: [5, 9, 12], adv: [] },
   ];
-  const lookups = ['deps.dev', 'GitHub', 'OSV'];
+  const lookups = ['npm · uv · cargo', 'GitHub', 'OSV'];
+  // What each lookup is, under its name: wide on one line or two, tall in a word or two.
+  const lookupNotes = {
+    wide: [['in the repository’s own shell,', 'deps.dev where none runs'], ['what no package manager names'], ['every pin, in one query']],
+    tall: [['in its own shell'], ['no package', 'manager names'], ['every pin']],
+  };
 
   type Dep = { g: number; k: number; to: number; newer: boolean; adv: boolean; rank: number; rankIn: number };
   const deps: Dep[] = [];
@@ -199,7 +206,7 @@
     };
     const arrived = (l: number, f: number) =>
       l === 2 ? deps.filter((d) => f >= osvAt(d) + 0.04).length : deps.filter((d) => d.to === l && f >= gatherAt(d) + GATHER).length;
-    const requests = (f: number) => [0, 1, 2].filter((l) => f >= sendAt(l)).length;
+    const asked = (f: number) => [0, 1, 2].filter((l) => f >= sendAt(l)).length;
 
     function draw(f: number) {
       ctx.clearRect(0, 0, L.W, L.H);
@@ -235,7 +242,10 @@
         ctx.fill();
         ctx.strokeStyle = hit ? colors.accent : colors.rule;
         ctx.stroke();
-        text(lookups[l], n.x, n.y + 4.5, { size: 13, weight: 600, align: 'center', color: hit ? colors.onAccent : colors.fg, mono: l !== 1 });
+        text(lookups[l], n.x, n.y + 4.5, { size: l === 0 && L !== wide ? 11.5 : 13, weight: 600, align: 'center', color: hit ? colors.onAccent : colors.fg, mono: l === 2 });
+        (L === wide ? lookupNotes.wide : lookupNotes.tall)[l].forEach((line, k) =>
+          text(line, n.x, n.y + 38 + k * 14, { size: L === wide ? 11 : 10.5, color: colors.muted, align: 'center' }),
+        );
       }
 
       // The envelopes: filled by the identities, sent once, answered once.
@@ -259,7 +269,7 @@
         ctx.globalAlpha = 1;
       }
 
-      // What each lookup was sent, once its answer is home: one request.
+      // What each lookup was, once its answer is home.
       for (let l = 0; l < 3; l++) {
         const done = l === 2 ? SPARK + 0.02 : 0.56;
         if (f < done) continue;
@@ -269,7 +279,7 @@
         ctx.strokeStyle = colors.accent;
         ctx.lineWidth = 1.5;
         ctx.stroke();
-        text('1 request', b.x, b.y + 4, { size: 11.5, weight: 600, align: 'center', color: colors.accent });
+        text(l === 0 ? 'read-only' : '1 query', b.x, b.y + 4, { size: 11.5, weight: 600, align: 'center', color: colors.accent });
         ctx.globalAlpha = 1;
       }
 
@@ -324,9 +334,9 @@
       ctx.moveTo(L === wide ? 20 : 14, L.count.y - 26);
       ctx.lineTo(L.W - (L === wide ? 20 : 14), L.count.y - 26);
       ctx.stroke();
-      const r = requests(f);
+      const r = asked(f);
       const c = L.count;
-      const parts: Array<[string, string]> = [[`${N}`, ' dependencies · '], [`${r}`, r === 1 ? ' request' : ' requests']];
+      const parts: Array<[string, string]> = [[`${N}`, ' dependencies · '], [`${r}`, r === 1 ? ' lookup' : ' lookups']];
       let x = c.x;
       ctx.globalAlpha = fade;
       for (const [num, rest] of parts) {
@@ -367,10 +377,10 @@
         lx += widths[i] + 14;
       });
       ctx.globalAlpha = 1;
-      // In the batches' heading, how many identities each request carries.
+      // Over each batch, what it carries.
       for (let l = 0; l < 3; l++) {
         const b = L.batch(l);
-        if (f >= (l === 2 ? osvAt(deps[0]) : 0.06)) text(l === 2 ? 'every pin' : `${batchSize[l]} identities`, b.x, b.y + (L === wide ? 32 : -24), { size: 11, color: colors.muted, align: 'center' });
+        if (f >= (l === 2 ? osvAt(deps[0]) : 0.06)) text(l === 2 ? 'every pin' : l === 0 ? `${batchSize[l]} packages` : `${batchSize[l]} repositories`, b.x, b.y + (L === wide ? 32 : -24), { size: 11, color: colors.muted, align: 'center' });
       }
     }
 

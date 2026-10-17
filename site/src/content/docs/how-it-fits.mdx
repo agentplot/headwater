@@ -23,11 +23,11 @@ and a key that starts an agent in a worktree of its own to make the bump
 and submit it to sluice.
 
 In a repository whose work runs through a plan, headwater's Flywheel plugin
-hands each release to millpond instead. `headwater capture` prints one
-capture per newly reported release, its notes as the excerpt, under a key
-made from the release's Package URL, `release/<type>/<namespace>/<name>/<version>`.
-millpond keeps each key once, so a release headwater reports every day
-lands once. There the fix key hands the release to millpond as well, and
+hands each release to millpond instead. On each run, `headwater capture`
+prints a capture for every release newer than its pin, its notes as the
+excerpt, under a key made from the release's Package URL,
+`release/<type>/<namespace>/<name>/<version>`. millpond keeps each key
+once, so a release headwater reports every day lands once. There the fix key hands the release to millpond as well, and
 no agent starts outside the plan.
 
 headwater never learns which inbox records its releases, and millpond

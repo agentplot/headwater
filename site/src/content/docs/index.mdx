@@ -20,8 +20,9 @@ hero:
 
 import { Card, CardGrid } from '@astrojs/starlight/components';
 
-headwater reads what a repository declares, asks where each dependency is
-published, and reports every release newer than the pin. The pin alone
+headwater reads what a repository declares, asks each ecosystem's package
+manager first, in the repository's own shell, and reports every release
+newer than the pin. The pin alone
 decides what is new, so headwater keeps no list of what it reported: when a
 bump lands, the pin moves and the release leaves the report.
 
@@ -31,8 +32,9 @@ bump lands, the pin moves and the release leaves the report.
 
 <CardGrid>
   <Card title="Every newer release" icon="seti:git">
-    Each release past the pin, with its date, its link and its notes whole,
-    as upstream wrote them. No model reads the notes inside headwater.
+    Each release past the pin, marked inside or outside the declared range,
+    with its date, its link and its notes whole, as upstream wrote them. No
+    model reads the notes inside headwater.
   </Card>
   <Card title="Advisories that name the pin" icon="warning">
     Reported apart from the notes. A dependency an advisory names stays
@@ -44,15 +46,17 @@ bump lands, the pin moves and the release leaves the report.
   </Card>
   <Card title="A brief for each release" icon="document">
     Everything a fixer needs to make the bump: the release, its notes, its
-    advisories, and every declaration of the dependency with its pin.
+    advisories, every declaration of the dependency with its pin, and the
+    ecosystem's own command for the move.
   </Card>
 </CardGrid>
 
 ## What it never does
 
 headwater never changes a repository, never rewords or ranks a release,
-and never acts on one. A person or a coding agent decides whether to move
-a pin, and the change is theirs. A lookup learns the identities and
+and never acts on one. It runs a package manager only to read, and never
+runs the command that moves a pin. A person or a coding agent decides
+whether to move it, and the change is theirs. A lookup learns the identities and
 versions headwater asks about and nothing else of the repository, and
 headwater keeps no credential.
 
@@ -77,8 +81,8 @@ report.
     sluice.
   </Card>
   <Card title="Flywheel" icon="random">
-    An adapter that hands each newly reported release to millpond, the
-    inbox, which records it once. [How it fits](/headwater/how-it-fits/).
+    An adapter that hands every release newer than its pin to millpond, the
+    inbox, which records each one once. [How it fits](/headwater/how-it-fits/).
   </Card>
 </CardGrid>
 
