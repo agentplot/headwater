@@ -1,0 +1,419 @@
+---
+// How it works: one scan asks each lookup in batches. Forty-seven
+// dependencies from five kinds of declaration go to three lookups as three
+// requests, and come home marked with what the lookups said. Drawn on a
+// canvas, since every dependency moves on its own path. The positions are a
+// function of the time in the loop, so the reduced-motion still and a
+// screenshot's frame are exact (the hw:frame event sets one).
+---
+
+<figure class="hw-canvas not-content">
+  <canvas
+    role="img"
+    aria-label="Forty-seven dependencies, declared in package.json, pyproject.toml, Cargo.toml, the workflows and a watch list, gather into batches. The npm, PyPI and Cargo identities go to deps.dev as one request of twenty-eight; the workflows' actions and the watch list's tools go to GitHub as one query of nineteen repositories. Each answer comes back and the dependencies return home, ten of them marked as having a newer release. Then every pin goes to OSV as one batched query, and two dependencies come back marked as named by an advisory. Forty-seven dependencies, three requests."
+  ></canvas>
+  <figcaption><slot /></figcaption>
+</figure>
+
+<style>
+  .hw-canvas {
+    margin: 2rem 0;
+  }
+  canvas {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--sl-color-gray-5);
+    border-radius: 0.75rem;
+    box-shadow: 0 1.5rem 3rem -1.75rem var(--d-shadow);
+    background: var(--d-bg);
+  }
+  figcaption {
+    margin-top: 0.75rem;
+    font-size: var(--sl-text-sm);
+    color: var(--sl-color-gray-3);
+  }
+  figcaption:empty {
+    display: none;
+  }
+</style>
+
+<script>
+  type Pt = { x: number; y: number };
+  const T = 14; // seconds per loop
+  const STILL = 0.9; // the frame a reader who asks for less motion sees
+
+  const groups = [
+    { label: 'package.json', n: 14, to: 0, newer: [2, 7, 11], adv: [7] },
+    { label: 'pyproject.toml', n: 8, to: 0, newer: [3], adv: [5] },
+    { label: 'Cargo.toml', n: 6, to: 0, newer: [1], adv: [] },
+    { label: 'workflows', n: 5, to: 1, newer: [0, 4], adv: [] },
+    { label: 'watch list', n: 14, to: 1, newer: [5, 9, 12], adv: [] },
+  ];
+  const lookups = ['deps.dev', 'GitHub', 'OSV'];
+
+  type Dep = { g: number; k: number; to: number; newer: boolean; adv: boolean; rank: number; rankIn: number };
+  const deps: Dep[] = [];
+  groups.forEach((g, gi) => {
+    for (let k = 0; k < g.n; k++) deps.push({ g: gi, k, to: g.to, newer: g.newer.includes(k), adv: g.adv.includes(k), rank: 0, rankIn: 0 });
+  });
+  const N = deps.length;
+  // An order of departure that interleaves the declarations, so the batches fill side by side.
+  deps.map((d, i) => ({ d, key: (d.k * 7 + d.g * 3) % N + i / 1000 })).sort((a, b) => a.key - b.key).forEach(({ d }, r) => (d.rank = r));
+  const perLookup = [0, 0, 0];
+  [...deps].sort((a, b) => a.rank - b.rank).forEach((d) => (d.rankIn = perLookup[d.to]++));
+  const batchSize = [perLookup[0], perLookup[1], N];
+
+  const clamp = (v: number) => Math.max(0, Math.min(1, v));
+  const ease = (v: number) => (v < 0.5 ? 2 * v * v : 1 - (-2 * v + 2) ** 2 / 2);
+  const lerp = (a: Pt, b: Pt, t: number): Pt => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+  const span = (f: number, a: number, b: number) => ease(clamp((f - a) / (b - a)));
+
+  // Times, as fractions of the loop.
+  const gatherAt = (d: Dep) => 0.04 + 0.16 * (d.rank / N);
+  const GATHER = 0.06;
+  const sendAt = (l: number) => [0.29, 0.31, 0.68][l];
+  const TRAVEL = 0.06;
+  const backAt = (l: number) => [0.38, 0.4, 0.75][l];
+  const homeAt = (d: Dep) => 0.48 + 0.08 * (d.rankIn / Math.max(1, perLookup[d.to]));
+  const HOME = 0.06;
+  const osvAt = (d: Dep) => 0.585 + 0.045 * (d.rank / N);
+  const SPARK = 0.83;
+
+  interface Layout {
+    W: number;
+    H: number;
+    home: (d: Dep) => Pt;
+    label: (g: number) => Pt;
+    batch: (l: number) => Pt;
+    node: (l: number) => Pt;
+    nodeW: number;
+    count: Pt;
+    countAlign: CanvasTextAlign;
+    heads: Array<[string, number, number]>;
+  }
+
+  const wide: Layout = {
+    W: 720,
+    H: 372,
+    home: (d) => {
+      const tops = [56, 108, 160, 198, 236];
+      return { x: 26 + (d.k % 7) * 14, y: tops[d.g] + 22 + Math.floor(d.k / 7) * 14 };
+    },
+    label: (g) => ({ x: 20, y: [56, 108, 160, 198, 236][g] + 8 }),
+    batch: (l) => ({ x: 370, y: [92, 182, 272][l] }),
+    node: (l) => ({ x: 624, y: [92, 182, 272][l] }),
+    nodeW: 132,
+    count: { x: 20, y: 350 },
+    countAlign: 'left',
+    heads: [
+      ['DECLARATIONS', 20, 36],
+      ['BATCHES', 330, 36],
+      ['LOOKUPS', 558, 36],
+    ],
+  };
+
+  const tall: Layout = {
+    W: 360,
+    H: 572,
+    home: (d) => ({ x: 132 + d.k * 15, y: 66 + d.g * 30 }),
+    label: (g) => ({ x: 14, y: 70 + g * 30 }),
+    batch: (l) => ({ x: [64, 180, 296][l], y: 270 }),
+    node: (l) => ({ x: [64, 180, 296][l], y: 430 }),
+    nodeW: 104,
+    count: { x: 14, y: 516 },
+    countAlign: 'left',
+    heads: [
+      ['DECLARATIONS', 14, 36],
+      ['BATCHES', 14, 226],
+    ],
+  };
+
+  // Where the j-th of a batch's identities sits while it waits: a tight spiral.
+  const slot = (c: Pt, j: number): Pt => {
+    const a = j * 2.4;
+    const r = 3.2 * Math.sqrt(j);
+    return { x: c.x + Math.cos(a) * r, y: c.y + Math.sin(a) * r };
+  };
+
+  function setup(canvas: HTMLCanvasElement) {
+    const ctx = canvas.getContext('2d')!;
+    const fig = canvas.closest('figure')!;
+    let L = wide;
+    let colors: Record<string, string> = {};
+    let fonts = { sans: 'sans-serif', mono: 'monospace' };
+    let scale = 1;
+
+    const readTheme = () => {
+      const cs = getComputedStyle(canvas);
+      const v = (n: string) => cs.getPropertyValue(n).trim();
+      colors = {
+        bg: v('--d-bg'), panel: v('--d-panel'), fg: v('--d-fg'), muted: v('--d-muted'), faint: v('--d-faint'),
+        rule: v('--d-rule'), soft: v('--d-soft'), accent: v('--d-accent'), onAccent: v('--d-on-accent'), bad: v('--d-bad'),
+      };
+      fonts = { sans: v('--sl-font') || 'sans-serif', mono: v('--sl-font-mono') || 'monospace' };
+    };
+
+    const resize = () => {
+      const w = canvas.clientWidth;
+      L = w < 544 ? tall : wide;
+      scale = w / L.W;
+      const dpr = window.devicePixelRatio || 1;
+      canvas.style.height = `${L.H * scale}px`;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(L.H * scale * dpr);
+      ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+    };
+
+    const text = (s: string, x: number, y: number, o: { size?: number; color?: string; mono?: boolean; weight?: number; align?: CanvasTextAlign; spacing?: number } = {}) => {
+      ctx.font = `${o.weight ?? 400} ${o.size ?? 12}px ${o.mono ? fonts.mono : fonts.sans}`;
+      ctx.fillStyle = o.color ?? colors.fg;
+      ctx.textAlign = o.align ?? 'left';
+      ctx.textBaseline = 'alphabetic';
+      if (o.spacing) (ctx as any).letterSpacing = `${o.spacing}px`;
+      ctx.fillText(s, x, y);
+      if (o.spacing) (ctx as any).letterSpacing = '0px';
+    };
+    const rrect = (x: number, y: number, w: number, h: number, r: number) => {
+      ctx.beginPath();
+      ctx.roundRect(x, y, w, h, r);
+    };
+    const dot = (p: Pt, r: number, fill: string, alpha = 1) => {
+      ctx.globalAlpha = alpha;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r, 0, Math.PI * 2);
+      ctx.fillStyle = fill;
+      ctx.fill();
+      ctx.globalAlpha = 1;
+    };
+
+    // Where the envelope of lookup l is at f, how full, and which way it goes.
+    const envelope = (l: number, f: number) => {
+      const b = L.batch(l);
+      const n = L.node(l);
+      const edge = { x: n.x - (L === wide ? L.nodeW / 2 + 24 : 0), y: n.y - (L === wide ? 0 : 38) };
+      const s = sendAt(l);
+      const k = backAt(l);
+      if (f < s) return { p: b, back: false };
+      if (f < k) return { p: lerp(b, edge, span(f, s, s + TRAVEL)), back: false };
+      return { p: lerp(edge, b, span(f, k, k + TRAVEL)), back: true };
+    };
+    const arrived = (l: number, f: number) =>
+      l === 2 ? deps.filter((d) => f >= osvAt(d) + 0.04).length : deps.filter((d) => d.to === l && f >= gatherAt(d) + GATHER).length;
+    const requests = (f: number) => [0, 1, 2].filter((l) => f >= sendAt(l)).length;
+
+    function draw(f: number) {
+      ctx.clearRect(0, 0, L.W, L.H);
+      ctx.fillStyle = colors.bg;
+      ctx.fillRect(0, 0, L.W, L.H);
+      const fade = f > 0.96 ? 1 - span(f, 0.96, 1) : 1;
+
+      for (const [s, x, y] of L.heads) text(s, x, y, { size: 11, color: colors.muted, weight: 600, spacing: 0.9 });
+
+      // The declarations' names.
+      groups.forEach((g, gi) => {
+        const p = L.label(gi);
+        text(g.label, p.x, p.y, { size: 11.5, mono: true, color: colors.fg });
+        text(String(g.n), L === wide ? 150 : 118, p.y, { size: 11, color: colors.muted, align: 'right', mono: true });
+      });
+
+      // The lookups, and the way from each batch to its lookup.
+      for (let l = 0; l < 3; l++) {
+        const b = L.batch(l);
+        const n = L.node(l);
+        ctx.strokeStyle = colors.rule;
+        ctx.lineWidth = 1.5;
+        ctx.setLineDash([3, 4]);
+        ctx.beginPath();
+        ctx.moveTo(b.x, b.y);
+        ctx.lineTo(L === wide ? n.x - L.nodeW / 2 : n.x, L === wide ? n.y : n.y - 22);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        const hit = f >= sendAt(l) + TRAVEL && f < backAt(l) + 0.01;
+        const w = L.nodeW;
+        rrect(n.x - w / 2, n.y - 22, w, 44, 8);
+        ctx.fillStyle = hit ? colors.accent : colors.panel;
+        ctx.fill();
+        ctx.strokeStyle = hit ? colors.accent : colors.rule;
+        ctx.stroke();
+        text(lookups[l], n.x, n.y + 4.5, { size: 13, weight: 600, align: 'center', color: hit ? colors.onAccent : colors.fg, mono: l !== 1 });
+      }
+
+      // The envelopes: filled by the identities, sent once, answered once.
+      for (let l = 0; l < 3; l++) {
+        const count = arrived(l, f);
+        const start = l === 2 ? osvAt(deps[0]) : 0.04;
+        const end = l === 2 ? SPARK : 0.56;
+        if (f < start || f > end + 0.01 || count === 0) continue;
+        const { p, back } = envelope(l, f);
+        const alpha = back && f > (l === 2 ? 0.79 : 0.5) ? 1 - span(f, l === 2 ? 0.79 : 0.5, end) : 1;
+        ctx.globalAlpha = alpha * fade;
+        const label = back ? (l === 2 ? 'advisories' : 'releases') : `${count}`;
+        const w = back ? 74 : 44;
+        rrect(p.x - w / 2, p.y - 13, w, 26, 13);
+        ctx.fillStyle = back ? colors.panel : colors.accent;
+        ctx.fill();
+        ctx.strokeStyle = colors.accent;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        text(label, p.x, p.y + 4, { size: 11.5, weight: 600, align: 'center', mono: !back, color: back ? colors.accent : colors.onAccent });
+        ctx.globalAlpha = 1;
+      }
+
+      // What each lookup was sent, once its answer is home: one request.
+      for (let l = 0; l < 3; l++) {
+        const done = l === 2 ? SPARK + 0.02 : 0.56;
+        if (f < done) continue;
+        const b = L.batch(l);
+        ctx.globalAlpha = clamp((f - done) / 0.02) * fade;
+        rrect(b.x - 38, b.y - 12, 76, 24, 12);
+        ctx.strokeStyle = colors.accent;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        text('1 request', b.x, b.y + 4, { size: 11.5, weight: 600, align: 'center', color: colors.accent });
+        ctx.globalAlpha = 1;
+      }
+
+      // Every dependency: home, into its batch, home again with its answer.
+      for (const d of deps) {
+        const h = L.home(d);
+        const b = L.batch(d.to);
+        const s = slot(b, d.rankIn);
+        const g0 = gatherAt(d);
+        const h0 = homeAt(d);
+        let p = h;
+        let shown = true;
+        let answered = f >= h0;
+        if (f >= g0 && f < h0) {
+          const t = span(f, g0, g0 + GATHER);
+          p = lerp(h, s, t);
+          shown = t < 1;
+        } else if (f >= h0) {
+          p = lerp(s, h, span(f, h0, h0 + HOME));
+        }
+        if (!shown) continue;
+        const color = answered ? (d.newer ? colors.accent : colors.faint) : colors.muted;
+        dot(p, answered && d.newer ? 4.6 : 4, color, fade);
+        if (d.adv && f >= SPARK + 0.03) {
+          ctx.globalAlpha = fade;
+          ctx.beginPath();
+          ctx.arc(h.x, h.y, 7.5, 0, Math.PI * 2);
+          ctx.strokeStyle = colors.bad;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+        }
+      }
+
+      // Every pin, copied into one batch for OSV, and the advisories' way back.
+      for (const d of deps) {
+        const o0 = osvAt(d);
+        if (f < o0 || f > o0 + 0.04) continue;
+        const p = lerp(L.home(d), slot(L.batch(2), d.rank % 30), span(f, o0, o0 + 0.04));
+        dot(p, 2.4, colors.muted, 0.9);
+      }
+      for (const d of deps.filter((x) => x.adv)) {
+        if (f < SPARK - 0.04 || f > SPARK + 0.03) continue;
+        const p = lerp(L.batch(2), L.home(d), span(f, SPARK - 0.04, SPARK + 0.03));
+        dot(p, 3.4, colors.bad);
+      }
+
+      // The tally, under a rule of its own.
+      ctx.strokeStyle = colors.rule;
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(L === wide ? 20 : 14, L.count.y - 26);
+      ctx.lineTo(L.W - (L === wide ? 20 : 14), L.count.y - 26);
+      ctx.stroke();
+      const r = requests(f);
+      const c = L.count;
+      const parts: Array<[string, string]> = [[`${N}`, ' dependencies · '], [`${r}`, r === 1 ? ' request' : ' requests']];
+      let x = c.x;
+      ctx.globalAlpha = fade;
+      for (const [num, rest] of parts) {
+        text(num, x, c.y, { size: 15, weight: 700, mono: true, color: colors.fg });
+        ctx.font = `700 15px ${fonts.mono}`;
+        x += ctx.measureText(num).width;
+        text(rest, x, c.y, { size: 13, color: colors.muted });
+        ctx.font = `400 13px ${fonts.sans}`;
+        x += ctx.measureText(rest).width;
+      }
+      const newer = deps.filter((d) => d.newer).length;
+      const adv = deps.filter((d) => d.adv).length;
+      const second = L === wide ? { x: L.W - 20, y: c.y, align: 'right' as CanvasTextAlign } : { x: c.x, y: c.y + 22, align: 'left' as CanvasTextAlign };
+      const legend: Array<[string, string, number]> = [
+        [`${newer} with a newer release`, colors.accent, 0.56],
+        [`${adv} named by an advisory`, colors.bad, SPARK + 0.03],
+      ];
+      ctx.font = `400 12.5px ${fonts.sans}`;
+      const widths = legend.map(([s]) => ctx.measureText(s).width + 18);
+      let lx = second.align === 'right' ? second.x - widths.reduce((a, b) => a + b + 14, -14) : second.x;
+      legend.forEach(([s, col, at], i) => {
+        const a = clamp((f - at) / 0.02);
+        if (a <= 0) {
+          lx += widths[i] + 14;
+          return;
+        }
+        ctx.globalAlpha = a * fade;
+        if (i === 0) dot({ x: lx + 5, y: second.y - 4 }, 4.6, col, a * fade);
+        else {
+          ctx.beginPath();
+          ctx.arc(lx + 5, second.y - 4, 5.5, 0, Math.PI * 2);
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        ctx.globalAlpha = a * fade;
+        text(s, lx + 16, second.y, { size: 12.5, color: colors.fg });
+        lx += widths[i] + 14;
+      });
+      ctx.globalAlpha = 1;
+      // In the batches' heading, how many identities each request carries.
+      for (let l = 0; l < 3; l++) {
+        const b = L.batch(l);
+        if (f >= (l === 2 ? osvAt(deps[0]) : 0.06)) text(l === 2 ? 'every pin' : `${batchSize[l]} identities`, b.x, b.y + (L === wide ? 32 : -24), { size: 11, color: colors.muted, align: 'center' });
+      }
+    }
+
+    let frame: number | null = null;
+    let pinned: number | null = null;
+    let visible = true;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const start = performance.now();
+    const loop = (now: number) => {
+      draw((((now - start) / 1000) % T) / T);
+      frame = requestAnimationFrame(loop);
+    };
+    const render = () => {
+      if (frame !== null) cancelAnimationFrame(frame);
+      frame = null;
+      if (pinned !== null) return draw(pinned);
+      if (reduce.matches || !visible) return draw(STILL);
+      frame = requestAnimationFrame(loop);
+    };
+
+    readTheme();
+    resize();
+    render();
+    new ResizeObserver(() => {
+      resize();
+      render();
+    }).observe(canvas);
+    new MutationObserver(() => {
+      readTheme();
+      render();
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    reduce.addEventListener('change', render);
+    new IntersectionObserver(([e]) => {
+      visible = e.isIntersecting;
+      render();
+    }).observe(canvas);
+    document.fonts?.ready.then(render);
+    // A screenshot's frame: hold the loop at one point.
+    fig.addEventListener('hw:frame', (e) => {
+      pinned = (e as CustomEvent<number>).detail;
+      render();
+    });
+  }
+
+  document.querySelectorAll<HTMLCanvasElement>('figure.hw-canvas canvas').forEach(setup);
+</script>

@@ -1,0 +1,78 @@
+---
+// A placeholder for the family diagram that @agentplot/site-theme draws,
+// animated and shared by every tool's site: once the theme lands, How it
+// fits imports the theme's diagram with highlight="headwater" and this file
+// goes. It shows the same family, still, with the highlighted tool lit.
+import Figure from './Figure.astro';
+
+interface Props {
+  highlight?: 'headwater' | 'eddy' | 'millpond' | 'flywheel' | 'sluice';
+}
+const { highlight = 'headwater' } = Astro.props;
+
+type Node = { id: string; name: string; what: string; x: number; y: number };
+const W = 720;
+const H = 250;
+const nodes: Node[] = [
+  { id: 'headwater', name: 'headwater', what: 'releases', x: 28, y: 56 },
+  { id: 'eddy', name: 'eddy', what: 'meetings', x: 28, y: 132 },
+  { id: 'millpond', name: 'millpond', what: 'the inbox', x: 214, y: 94 },
+  { id: 'flywheel', name: 'Flywheel', what: 'plans and teams', x: 404, y: 94 },
+  { id: 'sluice', name: 'sluice', what: 'lands each change', x: 576, y: 94 },
+];
+const tallNodes: Node[] = [
+  { id: 'headwater', name: 'headwater', what: 'releases', x: 22, y: 50 },
+  { id: 'eddy', name: 'eddy', what: 'meetings', x: 192, y: 50 },
+  { id: 'millpond', name: 'millpond', what: 'the inbox', x: 107, y: 136 },
+  { id: 'flywheel', name: 'Flywheel', what: 'plans and teams', x: 107, y: 214 },
+  { id: 'sluice', name: 'sluice', what: 'lands each change', x: 107, y: 292 },
+];
+const draw = (wide: boolean) => {
+  const list = wide ? nodes : tallNodes;
+  const w = wide ? 120 : 148;
+  const h = 46;
+  const at = (id: string) => list.find((n) => n.id === id)!;
+  const box = (n: Node) => {
+    const lit = n.id === highlight;
+    return `<g><rect x="${n.x}" y="${n.y}" width="${w}" height="${h}" rx="8" class="${lit ? 'lit' : 'box'}"/><text x="${n.x + 12}" y="${n.y + 19}" class="name">${n.name}</text><text x="${n.x + 12}" y="${n.y + 36}" class="what">${n.what}</text></g>`;
+  };
+  const m = at('millpond');
+  const f = at('flywheel');
+  const s = at('sluice');
+  const hw = at('headwater');
+  const e = at('eddy');
+  const lines = wide
+    ? [
+        `M${hw.x + w},${hw.y + h / 2} H${m.x - 30} V${m.y + h / 2 - 6} H${m.x}`,
+        `M${e.x + w},${e.y + h / 2} H${m.x - 30} V${m.y + h / 2 + 6} H${m.x}`,
+        `M${m.x + w},${m.y + h / 2} H${f.x}`,
+        `M${f.x + w},${f.y + h / 2} H${s.x}`,
+      ]
+    : [
+        `M${hw.x + w / 2},${hw.y + h} V${m.y - 14} H${m.x + w / 2 - 8} V${m.y}`,
+        `M${e.x + w / 2},${e.y + h} V${m.y - 14} H${m.x + w / 2 + 8} V${m.y}`,
+        `M${m.x + w / 2},${m.y + h} V${f.y}`,
+        `M${f.x + w / 2},${f.y + h} V${s.y}`,
+      ];
+  const back = wide
+    ? `M${s.x + w / 2},${s.y + h} V${H - 30} H${12} V${hw.y + h / 2} H${hw.x}`
+    : `M${s.x},${s.y + h / 2} H${10} V${hw.y + h / 2} H${hw.x}`;
+  const vh = wide ? H : 370;
+  const vw = wide ? W : 362;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${vw} ${vh}" class="fam" role="img" aria-label="The family: headwater reports releases and eddy lists meetings; both hand what they find to millpond, the inbox; Flywheel plans the work and runs the teams; sluice lands each change, and a landed bump moves headwater's pin."><rect width="${vw}" height="${vh}" rx="10" class="bg"/><text x="${wide ? 24 : 22}" y="30" class="hd">THE FAMILY</text>${lines.map((d) => `<path d="${d}" class="ln"/>`).join('')}<path d="${back}" class="back"/><text x="${wide ? 330 : 20}" y="${wide ? H - 38 : 356}" class="note">${wide ? 'a landed bump moves the pin' : 'a landed bump moves the pin'}</text>${list.map(box).join('')}</svg>`;
+};
+---
+
+<Figure wide={draw(true)} tall={draw(false)} />
+
+<style is:global>
+  .fam .bg { fill: var(--d-bg); }
+  .fam .hd { font: 600 11px var(--sl-font); letter-spacing: 0.08em; fill: var(--d-muted); }
+  .fam .box { fill: var(--d-panel); stroke: var(--d-rule); stroke-width: 1.5; }
+  .fam .lit { fill: var(--d-accent-soft); stroke: var(--d-accent); stroke-width: 2; }
+  .fam .name { font: 600 13px var(--sl-font); fill: var(--d-fg); }
+  .fam .what { font: 400 11.5px var(--sl-font); fill: var(--d-muted); }
+  .fam .ln { fill: none; stroke: var(--d-muted); stroke-width: 1.6; }
+  .fam .back { fill: none; stroke: var(--d-ok); stroke-width: 1.6; stroke-dasharray: 4 4; }
+  .fam .note { font: 400 11.5px var(--sl-font); fill: var(--d-muted); }
+</style>

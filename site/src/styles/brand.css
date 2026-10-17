@@ -1,0 +1,74 @@
+/* headwater on Starlight. Its accent is one variable, --hw-accent, with a
+   low and a high step beside it; @agentplot/site-theme sets them once it
+   carries the family's type and layout. Starlight's dark theme is :root,
+   its light one [data-theme='light']. sluice's green is kept as
+   --hw-sluice, for the step where a bump lands through it. */
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/700.css';
+@import '@fontsource/ibm-plex-sans/400.css';
+@import '@fontsource/ibm-plex-sans/400-italic.css';
+@import '@fontsource/ibm-plex-sans/600.css';
+@import '@fontsource/ibm-plex-mono/400.css';
+@import '@fontsource/ibm-plex-mono/600.css';
+
+:root {
+  --hw-accent: #4fa8ee;
+  --hw-accent-low: #0f2a40;
+  --hw-accent-high: #c4e2fb;
+  --hw-sluice: #45c27a;
+  --hw-display: 'Space Grotesk', var(--sl-font);
+
+  --sl-font: 'IBM Plex Sans', system-ui, sans-serif;
+  --sl-font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --sl-color-accent-low: var(--hw-accent-low);
+  --sl-color-accent: var(--hw-accent);
+  --sl-color-accent-high: var(--hw-accent-high);
+  --sl-color-white: #f2f1ec;
+  --sl-color-gray-1: #e6e5e0;
+  --sl-color-gray-2: #c9cbd2;
+  --sl-color-gray-3: #8c92a0;
+  --sl-color-gray-4: #5d6370;
+  --sl-color-gray-5: #2a2f38;
+  --sl-color-gray-6: #161a21;
+  --sl-color-black: #0e1116;
+}
+
+:root[data-theme='light'] {
+  --hw-accent: #1a6bb5;
+  --hw-accent-low: #d6e8f8;
+  --hw-accent-high: #0b3a66;
+  --hw-sluice: #1f8a4c;
+
+  --sl-color-white: #0e1116;
+  --sl-color-gray-1: #1b1f27;
+  --sl-color-gray-2: #2f343d;
+  --sl-color-gray-3: #5d6370;
+  --sl-color-gray-4: #8c92a0;
+  --sl-color-gray-5: #c9c7bf;
+  --sl-color-gray-6: #e9e7e0;
+  --sl-color-gray-7: #f2f1ec;
+  --sl-color-black: #f7f6f2;
+}
+
+.site-title,
+.sl-markdown-content :is(h1, h2, h3, h4),
+h1#_top {
+  font-family: var(--hw-display);
+  letter-spacing: -0.015em;
+}
+
+.site-title {
+  font-weight: 700;
+  font-size: var(--sl-text-xl);
+}
+
+/* The status banner: designed, not built. */
+.sl-banner {
+  background: var(--hw-accent-low);
+  color: var(--sl-color-white);
+  font-weight: 600;
+}
+.sl-banner a {
+  color: inherit;
+}

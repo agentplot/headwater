@@ -1,0 +1,75 @@
+---
+// The roadmap's steps as the order they depend in: H1 to H4 in a line, then
+// the lookups and both plugins side by side on the core. Still, since it
+// shows an order rather than a mechanism.
+import Figure from './Figure.astro';
+
+const steps: Record<string, [string, string]> = {
+  H1: ['Amend', 'the statement'],
+  H2: ['Scaffold', 'the repository'],
+  H3: ['Walk through', 'the scenarios'],
+  H4: ['Build', 'the core'],
+  H5: ['Build', 'the lookups'],
+  H6: ['Build the', 'Flywheel plugin'],
+  H7: ['Build the Claude', 'Code and herdr plugins'],
+};
+type P = { id: string; x: number; y: number };
+const node = ({ id, x, y }: P, w: number) =>
+  `<g><rect x="${x}" y="${y}" width="${w}" height="58" rx="8" class="${id === 'H1' ? 'rm-next' : 'rm-box'}"/>` +
+  `<text x="${x + 12}" y="${y + 18}" class="rm-id">${id}</text>` +
+  `<text x="${x + 12}" y="${y + 35}" class="rm-t">${steps[id][0]}</text>` +
+  `<text x="${x + 12}" y="${y + 50}" class="rm-t">${steps[id][1]}</text></g>`;
+const svg = (wide: boolean) => {
+  const W = wide ? 720 : 362;
+  const H = wide ? 252 : 520;
+  const w = wide ? 120 : 150;
+  const pts: P[] = wide
+    ? [
+        { id: 'H1', x: 20, y: 89 },
+        { id: 'H2', x: 158, y: 89 },
+        { id: 'H3', x: 296, y: 89 },
+        { id: 'H4', x: 434, y: 89 },
+        { id: 'H5', x: 552, y: 20 },
+        { id: 'H6', x: 552, y: 89 },
+        { id: 'H7', x: 552, y: 158 },
+      ]
+    : [
+        { id: 'H1', x: 20, y: 40 },
+        { id: 'H2', x: 20, y: 124 },
+        { id: 'H3', x: 20, y: 208 },
+        { id: 'H4', x: 20, y: 292 },
+        { id: 'H5', x: 192, y: 292 },
+        { id: 'H6', x: 192, y: 376 },
+        { id: 'H7', x: 192, y: 460 - 4 },
+      ];
+  const at = (id: string) => pts.find((p) => p.id === id)!;
+  const lines: string[] = [];
+  if (wide) {
+    // H4 sits a little left of the branch column, so its box is narrower.
+    for (const [a, b] of [['H1', 'H2'], ['H2', 'H3'], ['H3', 'H4']]) lines.push(`M${at(a).x + w},118 H${at(b).x}`);
+  } else {
+    for (const [a, b] of [['H1', 'H2'], ['H2', 'H3'], ['H3', 'H4']]) lines.push(`M${95},${at(a).y + 58} V${at(b).y}`);
+  }
+  const branch = wide
+    ? ['M528,118 H552', 'M540,118 V49 H552', 'M540,118 V187 H552']
+    : ['M170,321 H192', 'M181,321 V405 H192', 'M181,321 V485 H192'];
+  const h4w = wide ? 94 : w;
+  const boxes = pts.map((p) => node(p, p.id === 'H4' ? h4w : p.id >= 'H5' && wide ? 150 : w)).join('');
+  const note = wide
+    ? `<text x="20" y="238" class="rm-note">H1 waits on the operator's rulings. Each later step needs the one before it; H5, H6 and H7 need only the core.</text>`
+    : `<text x="20" y="20" class="rm-note">H1 waits on the operator's rulings.</text>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="The steps in order: H1 amend the statement, H2 scaffold the repository, H3 walk through the scenarios, H4 build the core; then H5 the lookups, H6 the Flywheel plugin and H7 the Claude Code and herdr plugins, each needing only the core. H1 waits on the operator's rulings." class="rm"><rect width="${W}" height="${H}" rx="10" class="rm-bg"/>${[...lines, ...branch].map((d) => `<path d="${d}" class="rm-ln"/>`).join('')}${boxes}${note}</svg>`;
+};
+---
+
+<Figure wide={svg(true)} tall={svg(false)} />
+
+<style is:global>
+  .rm .rm-bg { fill: var(--d-bg); }
+  .rm .rm-box { fill: var(--d-panel); stroke: var(--d-rule); stroke-width: 1.5; }
+  .rm .rm-next { fill: var(--d-accent-soft); stroke: var(--d-accent); stroke-width: 2; }
+  .rm .rm-id { font: 600 11px var(--sl-font-mono); fill: var(--d-accent); }
+  .rm .rm-t { font: 400 12px var(--sl-font); fill: var(--d-fg); }
+  .rm .rm-ln { fill: none; stroke: var(--d-muted); stroke-width: 1.6; }
+  .rm .rm-note { font: 400 11.5px var(--sl-font); fill: var(--d-muted); }
+</style>

@@ -1,0 +1,55 @@
+---
+title: How it fits
+description: headwater stands alone, or hands each release to millpond, the inbox, in a family of tools that turn outside events into work that lands.
+banner:
+  content: headwater is designed, not built. <a href="/headwater/roadmap/">The roadmap</a> orders the work.
+---
+
+import Figure from '../../components/Figure.astro';
+import FamilyDiagramPlaceholder from '../../components/FamilyDiagramPlaceholder.astro';
+import { surfacesSvg } from '../../diagrams/surfaces';
+
+headwater is one of a family of tools that turn what happens outside a
+repository into work that lands in it. Each tool stands alone, and each
+one's site is its own.
+
+<FamilyDiagramPlaceholder highlight="headwater" />
+
+- **headwater** reports releases and advisories for what a repository
+  declares.
+- **eddy** lists recorded meetings from each meeting service.
+- **millpond** is the inbox. It records each capture once, keeps what it
+  is made from, and serves the tools a curation session works through.
+- **Flywheel** plans the work and runs the teams that make it.
+- **[sluice](https://agentplot.github.io/sluice/)** tests each change as
+  it would land, and lands it.
+
+## Alone, or feeding an inbox
+
+<Figure wide={surfacesSvg('wide')} tall={surfacesSvg('tall')} />
+
+headwater needs none of the others. With its Claude Code and herdr plugins
+it is the whole loop: a sidebar of unread releases, a brief a fixer reads,
+and a key that starts an agent in a worktree of its own to make the bump
+and submit it to sluice.
+
+In a repository whose work runs through a plan, headwater's Flywheel plugin
+hands each release to millpond instead. `headwater capture` prints one
+capture per newly reported release, its notes as the excerpt, under a key
+made from the release's Package URL, `release/<type>/<namespace>/<name>/<version>`.
+millpond keeps each key once, so a release headwater reports every day
+lands once. There the fix key hands the release to millpond as well, and
+no agent starts outside the plan.
+
+headwater never learns which inbox records its releases, and millpond
+never asks a source itself. The pin closes the loop either way: when the
+bump lands, the release leaves every report.
+
+## swancloud, the first user
+
+swancloud, a NixOS fleet, pins its tools in Nix, where no manifest names
+them. A watch list generated from those pins gives headwater each tool's
+upstream repository, tag pattern and pin. Its entries keep the key the
+fleet's own release adapter has used since its first landing,
+`release/<name>/<version>`, so millpond sees each release it already
+holds as the same one.

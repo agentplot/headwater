@@ -1,0 +1,85 @@
+---
+title: How it works
+description: How headwater reads a repository, asks its lookups, decides what is new, and keeps what it needs to answer again.
+banner:
+  content: headwater is designed, not built. <a href="/headwater/roadmap/">The roadmap</a> orders the work.
+---
+
+import Figure from '../../components/Figure.astro';
+import Batches from '../../components/Batches.astro';
+import { tiersSvg } from '../../diagrams/tiers';
+import { advisorySvg } from '../../diagrams/advisory';
+
+headwater answers one question about a repository: which releases of what
+it depends on are newer than what it runs. It reads, it asks, it reports,
+and it keeps only what it needs to answer again. Numbers in parentheses
+cite clauses of [the statement](/headwater/design/).
+
+## One scan, few requests
+
+headwater reads every declaration the repository holds and gives each
+dependency one identity, a Package URL such as `pkg:npm/react`, whichever
+file names it (2). It then asks each lookup about many identities at
+once. deps.dev takes the npm, PyPI and Cargo packages in one request;
+GitHub takes every repository hosted there, fifty to a query, through
+your own `gh` sign-in; OSV takes every pin in one batched query. A lookup
+learns the identities and versions headwater asks about, and nothing else
+of the repository (37).
+
+<Batches>Forty-seven dependencies from five kinds of declaration, three requests. A dependency whose source does not answer comes home unread, with the reason.</Batches>
+
+## The pin decides what is new
+
+A release is newer than a pin only by the dependency's own version order:
+Semantic Versioning for npm, Cargo and GitHub tags that parse, PEP 440 for
+PyPI, Go's module rules, and calendar versions field by field where a
+watch list says so (6). headwater never orders two versions by their
+dates or their spelling. A release it cannot place against the pin is
+reported as undecided, beside the newer ones (7).
+
+headwater reads no record of what it reported before. Every scan reports
+a release until the pin reaches it, so a bump that lands is the only
+thing that clears one, and no one has to mark it done (9).
+
+## Scanned as often as it matters
+
+A repository names tiers of its dependencies in `.config/headwater.toml`,
+each with a cadence: the longest the tier may go without a complete scan.
+A repository with no such file has one tier, scanned every seven days.
+When a session starts, headwater scans the tiers that are due and reaches
+only their sources (15). Asked again before a tier falls due, it answers
+from what it holds and reaches no source (17). A scan that cannot reach a
+source reports what it could read, names the rest unread, and leaves the
+tier due (16).
+
+<Figure wide={tiersSvg('wide')} tall={tiersSvg('tall')} />
+
+## Advisories beside releases
+
+OSV answers which advisories name each pin. headwater reports them apart
+from the notes, and never infers one from what a release says (19). A
+person or an acting session may dismiss a release, or skip it until a
+newer one is published, and the release leaves the report (21). A
+dismissal never touches an advisory: a dependency whose pin an advisory
+names stays marked affected (22). When a bump moves the pin out of the
+advisory's range, the advisory no longer names it.
+
+<Figure wide={advisorySvg('wide')} tall={advisorySvg('tall')} />
+
+## A brief for the fixer
+
+For any release a report holds, headwater gives a brief: the release, its
+notes whole, its advisories, and every declaration of the dependency with
+the pin each gives, so a fixer can move every one (26). The brief names
+no tool and prescribes no step (27). The fixer, a coding agent or a
+person, decides whether to make the change, and the repository's own gate
+decides whether it lands.
+
+## What headwater keeps
+
+headwater keeps its state in the repository's git directory, so every
+worktree of one repository shares it and nothing lands in the
+repository's content (28). Everything but acknowledgements can be thrown
+away: the next scan rebuilds it and reports the same releases at a new
+time (29). Two scans at once leave the state as one of them would have,
+whole (30).

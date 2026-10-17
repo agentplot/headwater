@@ -1,0 +1,72 @@
+---
+title: Design
+description: Where headwater's design lives, and what its statement of invariants holds.
+banner:
+  content: headwater is designed, not built. <a href="/headwater/roadmap/">The roadmap</a> orders the work.
+---
+
+import { CardGrid, LinkCard } from '@astrojs/starlight/components';
+
+headwater's design lives in [agentplot/blueprints](https://github.com/agentplot/blueprints).
+The code cites the statement by clause number and never restates it.
+
+<CardGrid>
+  <LinkCard
+    title="The design book"
+    description="The settled design, chapter by chapter, with the statement as its appendix."
+    href="https://agentplot.github.io/blueprints/headwater/"
+  />
+  <LinkCard
+    title="The statement of invariants"
+    description="What headwater must always do and never do, in numbered clauses."
+    href="https://github.com/agentplot/blueprints/blob/main/design/headwater/requirements.md"
+  />
+</CardGrid>
+
+## What the statement holds
+
+The statement admits any model that satisfies it, and names no mechanism
+outside its profiles.
+
+| part | holds | clauses |
+|---|---|---|
+| A | What headwater decides: what a repository depends on, which releases are new, tiers and cadence, advisories, acknowledgements, briefs, what it keeps, its askers and surfaces, and what a source learns | 1 to 39 |
+| B | Its contracts across five seams: a dependency description, a release source, a notes source, an advisory source and a store | 40 to 52 |
+| C | The profiles that satisfy each contract: Package URL identities, the declarations it reads, deps.dev, each registry's API, GitHub releases, ecosyste.ms, OSV, and the git directory as its store | |
+
+## The invariants
+
+| | |
+|---|---|
+| I1 | headwater never changes a repository, and never acts on a release. |
+| I2 | The pin alone decides what is new. |
+| I3 | Upstream's words reach the asker as upstream wrote them, with no model between. |
+| I4 | A release has one identity for ever, everywhere. |
+| I5 | Asking what headwater holds reaches no source and writes nothing. |
+| I6 | Nothing headwater keeps but acknowledgements is needed to answer again. |
+
+## What it leaves to others
+
+headwater moves no pin, builds nothing, tests nothing and lands nothing: a
+fixer makes the change, and the repository's own gate decides whether it
+lands. It reports what the repository's authors chose, not the whole graph
+beneath them, which belongs to a vulnerability scanner. It never judges
+what a release means or summarises its notes, records nothing as anyone's
+own records, and tells no one by itself: a surface tells, when its asker
+asks.
+
+## Questions the model answers
+
+The statement names the questions a model of headwater must answer, and
+the operator rules them before the statement is amended (step D1 of the
+plan):
+
+- whether prereleases are reported, and when;
+- what a report says of a withdrawn release, and of a pin whose own
+  release is withdrawn;
+- whether advisories wait on a tier's cadence;
+- whether an acknowledgement is a person's or the repository's, and
+  whether it travels to another host;
+- where the held state lives when several hosts share one repository;
+- how a repository of several projects declares one tier across them;
+- whether a cadence runs from a complete scan's start or its end.

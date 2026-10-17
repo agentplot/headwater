@@ -1,0 +1,90 @@
+---
+title: headwater
+description: headwater tells a repository which releases of what it depends on are newer than what it runs, in upstream’s own words.
+template: splash
+banner:
+  content: headwater is designed, not built. <a href="/headwater/roadmap/">The roadmap</a> orders the work.
+hero:
+  tagline: headwater tells your repository which releases of what it depends on are newer than what it runs, in upstream’s own words.
+  actions:
+    - text: How it works
+      link: /headwater/how-it-works/
+      icon: right-arrow
+    - text: Read the design
+      link: https://agentplot.github.io/blueprints/headwater/
+      icon: external
+      variant: secondary
+    - text: GitHub
+      link: https://github.com/agentplot/headwater
+      icon: external
+      variant: minimal
+---
+
+import { Card, CardGrid } from '@astrojs/starlight/components';
+
+headwater reads what a repository declares, asks where each dependency is
+published, and reports every release newer than the pin. The pin alone
+decides what is new, so headwater keeps no list of what it reported: when a
+bump lands, the pin moves and the release leaves the report.
+
+## What a report holds
+
+<CardGrid>
+  <Card title="Every newer release" icon="seti:git">
+    Each release past the pin, with its date, its link and its notes whole,
+    as upstream wrote them. No model reads the notes inside headwater.
+  </Card>
+  <Card title="Advisories that name the pin" icon="warning">
+    Reported apart from the notes. A dependency an advisory names stays
+    marked affected, whatever anyone dismissed.
+  </Card>
+  <Card title="What it could not read" icon="information">
+    A declaration headwater cannot read, or a source it cannot reach, is
+    reported unread with the reason. Nothing drops out of a report.
+  </Card>
+  <Card title="A brief for each release" icon="document">
+    Everything a fixer needs to make the bump: the release, its notes, its
+    advisories, and every declaration of the dependency with its pin.
+  </Card>
+</CardGrid>
+
+## What it never does
+
+headwater never changes a repository, never rewords or ranks a release,
+and never acts on one. A person or a coding agent decides whether to move
+a pin, and the change is theirs. A lookup learns the identities and
+versions headwater asks about and nothing else of the repository, and
+headwater keeps no credential.
+
+## Where you meet it
+
+One core answers every surface the same way, so a person at the command
+line, an agent in its session and a pane beside the agents all see one
+report.
+
+<CardGrid>
+  <Card title="Command line" icon="seti:shell">
+    A scan, a report, a brief for one release, and every answer as JSON on
+    request.
+  </Card>
+  <Card title="Claude Code" icon="puzzle">
+    New releases noted at a session’s start, and a release handed to a
+    background agent in a worktree of its own.
+  </Card>
+  <Card title="herdr" icon="list-format">
+    A sidebar row of unread releases, a popup with the brief, and a key
+    that starts an agent in a worktree to make the bump and submit it to
+    sluice.
+  </Card>
+  <Card title="Flywheel" icon="random">
+    An adapter that hands each newly reported release to millpond, the
+    inbox, which records it once. [How it fits](/headwater/how-it-fits/).
+  </Card>
+</CardGrid>
+
+## Its first user
+
+swancloud, a NixOS fleet, runs headwater first. Its watch list, generated
+from the versions the fleet pins, names each tool’s upstream repository
+and tag pattern, and headwater takes over from the release adapter the
+fleet runs today.

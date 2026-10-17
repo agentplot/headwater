@@ -1,0 +1,32 @@
+---
+title: Roadmap
+description: The steps that build headwater, in order, and what each one is done by.
+banner:
+  content: headwater is designed, not built. <a href="/headwater/roadmap/">The roadmap</a> orders the work.
+---
+
+import RoadmapSteps from '../../components/RoadmapSteps.astro';
+
+The statement is written and under review, and nothing is built. These
+steps build headwater, in the order of the capture design's plan in
+agentplot/blueprints. Each is done by a check or an observation, never by
+a list ticked by hand.
+
+<RoadmapSteps />
+
+| step | what | needs | done when |
+|---|---|---|---|
+| H1 | **Amend the statement** with the operator's rulings on its open questions, a watch-list entry's claims and key, and the capture the Flywheel plugin prints. | the operator's rulings (plan steps D1, D2) | Vale is clean and the operator agrees to land it on main |
+| H2 | **Scaffold the repository**: the founding decisions (a Rust binary with seams, plugins outside the core, a JSON contract, state in the git directory, the pin decides what is new), its rules, devenv, moon, sluice's gate, git-cliff and OpenSpec. | H1 | sluice protects main and the first change lands through it |
+| H3 | **Walk through the scenarios**: a worked example of each against fake lookups, and the brief for the first phase. | H2 | every scenario has an example, and the brief names the clauses the phase proves |
+| H4 | **Build the core**: the seams as traits with fakes, the store in the git directory, scan, notes, brief, acknowledge and overview with JSON output, and a conformance suite whose cases cite clauses. | H3 | the suite passes against the fakes, and every Part A clause is cited |
+| H5 | **Build the lookups**: deps.dev and OSV in batches, GitHub through GraphQL with your own `gh` sign-in, ecosyste.ms, and each registry's own API where those fall short. | H4 | recorded requests replay in the suite, and a scan of swancloud's watch list matches its release adapter release for release |
+| H6 | **Build the Flywheel plugin**: `headwater capture` prints a capture per newly reported release. | H4, the capture crate | its output passes the capture contract's conformance pack, and millpond lands it |
+| H7 | **Build the Claude Code and herdr plugins**: a skill and a command that read the overview and briefs, a herdr sidebar of unread releases, and a fix key that starts an agent in a worktree and submits to sluice, or hands the release to millpond where a plan runs the work. | H4 | both plugins install from a tagged release and show a real repository's releases |
+
+## After headwater
+
+swancloud generates its watch list once the statement is amended, and cuts
+its release signals over to headwater once the lookups and the Flywheel
+plugin are built and millpond runs. The loop is closed when a release
+headwater reports reaches a bump that lands through sluice.
