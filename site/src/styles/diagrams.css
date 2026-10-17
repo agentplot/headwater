@@ -1,34 +1,26 @@
-/* The diagrams' palette, in both themes. Every diagram draws with these
-   tokens and nothing else, so it follows the site's theme toggle. The accent
-   and sluice's green are the family theme's; an advisory is amber, apart
-   from headwater's coral. */
+/* The diagrams' palette: the family theme's tokens (@agentplot/site-theme's
+   tokens.css) and headwater's accent, --ap-accent, so every diagram follows
+   the theme and its toggle. The one colour of headwater's own is amber, for
+   an advisory or a source that did not answer: the theme's --ap-bad is a red
+   too near headwater's coral to tell apart from it. */
 :root {
-  --d-bg: #12161d;
-  --d-panel: #1a1f28;
-  --d-fg: #f2f1ec;
-  --d-muted: #9a9fab;
-  --d-faint: #5d6370;
-  --d-rule: #2e3440;
-  --d-soft: #222833;
+  --d-bg: var(--ap-bg-2);
+  --d-panel: var(--ap-bg-3);
+  --d-fg: var(--ap-fg);
+  --d-muted: var(--ap-fg-3);
+  --d-faint: var(--ap-fg-4);
+  --d-rule: var(--ap-line);
+  --d-soft: var(--ap-line-soft);
   --d-accent: var(--ap-accent);
-  --d-accent-soft: color-mix(in srgb, var(--ap-accent) 20%, transparent);
-  --d-on-accent: #0e1116;
+  --d-accent-soft: color-mix(in oklab, var(--ap-accent) 22%, transparent);
+  --d-on-accent: var(--ap-bg);
   --d-ok: var(--ap-ok);
   --d-bad: #e9b44c;
-  --d-bad-soft: color-mix(in srgb, #e9b44c 16%, transparent);
+  --d-bad-soft: color-mix(in oklab, var(--d-bad) 16%, transparent);
   --d-shadow: rgb(0 0 0 / 0.45);
 }
 
 :root[data-theme='light'] {
-  --d-bg: #ebe9e2;
-  --d-panel: #fbfaf7;
-  --d-fg: #0e1116;
-  --d-muted: #5d6370;
-  --d-faint: #a3a7b0;
-  --d-rule: #d3d0c6;
-  --d-soft: #e1ded5;
-  --d-on-accent: #ffffff;
   --d-bad: #8a5a00;
-  --d-bad-soft: color-mix(in srgb, #b07a10 14%, transparent);
   --d-shadow: rgb(40 36 20 / 0.18);
 }

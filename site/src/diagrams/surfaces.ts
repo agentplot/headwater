@@ -3,7 +3,9 @@
 // in a worktree and sluice lands its bump; with an inbox, the Flywheel
 // plugin hands the release to millpond, which keeps it once however often
 // it is reported. Either way the landed bump moves the pin, and the release
-// leaves every surface (9). The loop runs the two ways in turn.
+// leaves every surface (9). The loop runs the two ways in turn. millpond is
+// drawn in its own accent, from the family's list in @agentplot/site-theme.
+import { member, pairCss } from '@agentplot/site-theme';
 import { BASE, Loop, esc, scope } from './loop';
 import type { Layout } from './hero';
 
@@ -197,7 +199,7 @@ export function surfacesSvg(layout: Layout): string {
   // With an inbox: millpond, which keeps one capture per key.
   const p = g.pond;
   windows('pondlit', [[63, 97]], 0.35);
-  box(p, 'lanebox', [`<text class="xs b" x="{x}" y="{y18}">millpond</text>`, `<text class="mono xxs m" x="{x}" y="{y35}">${KEY}</text>`], 'pondlit');
+  box(p, 'pondbox', [`<text class="xs b pondt" x="{x}" y="{y18}">millpond</text>`, `<text class="mono xxs m" x="{x}" y="{y35}">${KEY}</text>`], 'pondlit');
   // A second scan reports the release again, under the same key, and is kept once.
   const fy = g.surf[3];
   const from = layout === 'wide' ? { x: fy.x + fy.w, y: fy.y + fy.h / 2 } : { x: fy.x + fy.w / 2, y: fy.y + fy.h };
@@ -226,10 +228,12 @@ export function surfacesSvg(layout: Layout): string {
   });
 
   const style = L.style(
-    BASE +
+    pairCss('--d-millpond', member('millpond').accent) +
+      BASE +
       `.corebox{fill:var(--d-panel);stroke:var(--d-fg);stroke-width:1.6}
 .surfbox{fill:var(--d-panel);stroke:var(--d-rule);stroke-width:1.5}
 .lanebox{fill:var(--d-panel);stroke:var(--d-rule);stroke-width:1.5}
+.pondbox{fill:var(--d-panel);stroke:var(--d-millpond);stroke-width:1.5} .pondt{fill:var(--d-millpond)}
 .sluicebox{fill:var(--d-ok)} .sluicet{fill:var(--d-on-accent)}
 .chip{fill:var(--d-accent)} .chipt{fill:var(--d-on-accent);font-size:9px}
 .base{fill:none;stroke:var(--d-rule);stroke-width:1.5;stroke-dasharray:3 4}

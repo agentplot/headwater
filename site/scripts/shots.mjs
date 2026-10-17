@@ -5,7 +5,7 @@
 //
 //   devenv shell -- bun run shots <out-dir> [page ...]
 import { createServer } from 'node:http';
-import { mkdirSync, readFileSync, existsSync, statSync } from 'node:fs';
+import { mkdirSync, readFileSync, existsSync, statSync, rmSync } from 'node:fs';
 import { extname, join, resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
@@ -31,6 +31,8 @@ const server = createServer((req, res) => {
 }).listen(0);
 const origin = `http://127.0.0.1:${server.address().port}${base}`;
 
+// A run of every page starts its frames afresh, so none is left from a figure since removed.
+if (!only.length) rmSync(join(out, 'frames'), { recursive: true, force: true });
 mkdirSync(join(out, 'frames'), { recursive: true });
 // The full Chromium, which is the one the devenv shell's Nix store holds.
 const browser = await chromium.launch({ channel: 'chromium' });
@@ -39,12 +41,13 @@ try {
     if (only.length && !only.includes(name)) continue;
     for (const theme of themes) {
       for (const width of widths) {
-        const ctx = await browser.newContext({ viewport: { width, height: 900 }, colorScheme: theme, deviceScaleFactor: 2 });
+        // The page as a reader who asks for less motion sees it, each diagram
+        // at its still frame. Reduced motion is set before the page loads: set
+        // after, the still is offset by the time the loop already ran.
+        const ctx = await browser.newContext({ viewport: { width, height: 900 }, colorScheme: theme, deviceScaleFactor: 2, reducedMotion: 'reduce' });
         const page = await ctx.newPage();
         await page.goto(origin + path, { waitUntil: 'networkidle' });
         await page.evaluate(() => document.fonts.ready);
-        // The page as a reader first sees it, each diagram at its still frame.
-        await page.emulateMedia({ reducedMotion: 'reduce' });
         await page.waitForTimeout(200);
         await page.screenshot({ path: join(out, `${name}-${width}-${theme}.png`), fullPage: true });
         const figs = await page.locator('figure.hw-figure, figure.hw-canvas').all();
