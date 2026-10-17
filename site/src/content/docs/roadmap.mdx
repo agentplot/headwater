@@ -1,8 +1,6 @@
 ---
 title: Roadmap
 description: The steps that build headwater, in order, and what each one is done by.
-banner:
-  content: headwater is designed, not built. <a href="/headwater/roadmap/">The roadmap</a> orders the work.
 ---
 
 import RoadmapSteps from '../../components/RoadmapSteps.astro';
@@ -14,15 +12,26 @@ a list ticked by hand.
 
 <RoadmapSteps />
 
-| step | what | needs | done when |
-|---|---|---|---|
-| H1 | **Amend the statement** with the operator's rulings on its open questions, a watch-list entry's claims and key, and the capture the Flywheel plugin prints. | the operator's rulings (plan steps D1, D2) | Vale is clean and the operator agrees to land it on main |
-| H2 | **Scaffold the repository**: the founding decisions (a Rust binary with seams, plugins outside the core, a JSON contract, state in the git directory, the pin decides what is new), its rules, devenv, moon, sluice's gate, git-cliff and OpenSpec. | H1 | sluice protects main and the first change lands through it |
-| H3 | **Walk through the scenarios**: a worked example of each against fake lookups, and the brief for the first phase. | H2 | every scenario has an example, and the brief names the clauses the phase proves |
-| H4 | **Build the core**: the seams as traits with fakes, the store in the git directory, scan, notes, brief, acknowledge and overview with JSON output, and a conformance suite whose cases cite clauses. | H3 | the suite passes against the fakes, and every Part A clause is cited |
-| H5 | **Build the lookups**: deps.dev and OSV in batches, GitHub through GraphQL with your own `gh` sign-in, ecosyste.ms, and each registry's own API where those fall short. | H4 | recorded requests replay in the suite, and a scan of swancloud's watch list matches its release adapter release for release |
-| H6 | **Build the Flywheel plugin**: `headwater capture` prints a capture per newly reported release. | H4, the capture crate | its output passes the capture contract's conformance pack, and millpond lands it |
-| H7 | **Build the Claude Code and herdr plugins**: a skill and a command that read the overview and briefs, a herdr sidebar of unread releases, and a fix key that starts an agent in a worktree and submits to sluice, or hands the release to millpond where a plan runs the work. | H4 | both plugins install from a tagged release and show a real repository's releases |
+**H1 · Amend the statement.** The operator's rulings on its open questions go into it, with a watch-list entry's claims and key and the capture the Flywheel plugin prints.\
+*Needs* the operator's rulings (plan steps D1, D2). *Done when* Vale is clean and the operator agrees to land it on main.
+
+**H2 · Scaffold the repository.** The founding decisions (a Rust binary with seams, plugins outside the core, a JSON contract, state in the git directory, the pin decides what is new), its rules, devenv, moon, sluice's gate, git-cliff and OpenSpec.\
+*Needs* H1. *Done when* sluice protects main and the first change lands through it.
+
+**H3 · Walk through the scenarios.** A worked example of each against fake lookups, and the brief for the first phase.\
+*Needs* H2. *Done when* every scenario has an example, and the brief names the clauses the phase proves.
+
+**H4 · Build the core.** The seams as traits with fakes, the store in the git directory, scan, notes, brief, acknowledge and overview with JSON output, and a conformance suite whose cases cite clauses.\
+*Needs* H3. *Done when* the suite passes against the fakes, and every Part A clause is cited.
+
+**H5 · Build the lookups.** deps.dev and OSV in batches, GitHub through GraphQL with your own `gh` sign-in, ecosyste.ms, and each registry's own API where those fall short.\
+*Needs* H4. *Done when* recorded requests replay in the suite, and a scan of swancloud's watch list matches its release adapter release for release.
+
+**H6 · Build the Flywheel plugin.** `headwater capture` prints a capture per newly reported release.\
+*Needs* H4, the capture crate. *Done when* its output passes the capture contract's conformance pack, and millpond lands it.
+
+**H7 · Build the Claude Code and herdr plugins.** A skill and a command that read the overview and briefs, a herdr sidebar of unread releases, and a fix key that starts an agent in a worktree and submits to sluice, or hands the release to millpond where a plan runs the work.\
+*Needs* H4. *Done when* both plugins install from a tagged release and show a real repository's releases.
 
 ## After headwater
 

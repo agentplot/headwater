@@ -1,8 +1,7 @@
 /* The diagrams' palette: the family theme's tokens (@agentplot/site-theme's
    tokens.css) and headwater's accent, --ap-accent, so every diagram follows
-   the theme and its toggle. The one colour of headwater's own is amber, for
-   an advisory or a source that did not answer: the theme's --ap-bad is a red
-   too near headwater's coral to tell apart from it. */
+   the theme and its toggle. An advisory, or a source that did not answer,
+   takes the theme's warning colour, --ap-warn. */
 :root {
   --d-bg: var(--ap-bg-2);
   --d-panel: var(--ap-bg-3);
@@ -15,12 +14,11 @@
   --d-accent-soft: color-mix(in oklab, var(--ap-accent) 22%, transparent);
   --d-on-accent: var(--ap-bg);
   --d-ok: var(--ap-ok);
-  --d-bad: #e9b44c;
+  --d-bad: var(--ap-warn);
   --d-bad-soft: color-mix(in oklab, var(--d-bad) 16%, transparent);
   --d-shadow: rgb(0 0 0 / 0.45);
 }
 
 :root[data-theme='light'] {
-  --d-bad: #8a5a00;
   --d-shadow: rgb(40 36 20 / 0.18);
 }

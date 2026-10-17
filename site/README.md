@@ -15,8 +15,8 @@ devenv shell -- bash -c 'cd site && bun run shots <dir>'   # screenshots, after 
 
 `src/content/docs/`, one file per page, in the sidebar `astro.config.mjs`
 lists: the start page (`index.mdx`), how it works, how it fits, the design
-and the roadmap. Every page carries the "designed, not built" banner until
-headwater is built.
+and the roadmap. The theme's banner says headwater is designed, not built,
+on every page, until its entry in the theme's family list says otherwise.
 
 ## The look and the diagrams
 
@@ -26,8 +26,7 @@ Pages workflow builds once the dependency names its GitHub tag.
 
 | file | what |
 |---|---|
-| `src/styles/brand.css` | what is headwater's own over the family theme, `@agentplot/site-theme`, which gives the type, the colours and the accent, `--ap-accent`, set from the family's list |
-| `src/styles/diagrams.css` | the diagrams' palette, the only colours a diagram draws with: the family's accent and green, and amber for an advisory |
+| `src/styles/diagrams.css` | the diagrams' palette, the only colours a diagram draws with: the family's tokens, headwater's accent, `--ap-accent`, and the theme's warning colour, `--ap-warn`, for an advisory |
 | `src/diagrams/loop.ts` | the diagrams' animation: one CSS keyframe loop per drawing, a still frame for reduced motion, every class scoped to its drawing |
 | `src/diagrams/hero.ts` | the start page: the pin decides what is new |
 | `src/diagrams/tiers.ts` | how it works: a scan reaches only the sources of tiers that are due |

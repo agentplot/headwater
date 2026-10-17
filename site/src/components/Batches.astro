@@ -115,7 +115,7 @@
   const tall: Layout = {
     W: 360,
     H: 572,
-    home: (d) => ({ x: 132 + d.k * 15, y: 66 + d.g * 30 }),
+    home: (d) => ({ x: 138 + d.k * 14.5, y: 66 + d.g * 30 }),
     label: (g) => ({ x: 14, y: 70 + g * 30 }),
     batch: (l) => ({ x: [64, 180, 296][l], y: 270 }),
     node: (l) => ({ x: [64, 180, 296][l], y: 430 }),
@@ -213,7 +213,7 @@
       groups.forEach((g, gi) => {
         const p = L.label(gi);
         text(g.label, p.x, p.y, { size: 11.5, mono: true, color: colors.fg });
-        text(String(g.n), L === wide ? 150 : 118, p.y, { size: 11, color: colors.muted, align: 'right', mono: true });
+        text(String(g.n), L === wide ? 150 : 126, p.y, { size: 11, color: colors.muted, align: 'right', mono: true });
       });
 
       // The lookups, and the way from each batch to its lookup.

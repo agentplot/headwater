@@ -17,16 +17,18 @@ export default defineConfig({
         alt: 'headwater',
       },
       favicon: '/favicon.svg',
-      // The family's header and footer from @agentplot/site-theme, which
-      // find headwater by the title above; the start page's hero, with the
-      // animated diagram, where every other page keeps Starlight's.
+      // The family's header, status banner and footer from
+      // @agentplot/site-theme, which find headwater by the title above; the
+      // start page's hero, with the animated diagram, where every other page
+      // keeps Starlight's.
       components: {
         Header: '@agentplot/site-theme/starlight/Header.astro',
+        Banner: '@agentplot/site-theme/starlight/Banner.astro',
         Footer: '@agentplot/site-theme/starlight/Footer.astro',
         Hero: './src/components/Hero.astro',
       },
-      // The family's type, layout and accent, then headwater's own.
-      customCss: ['@agentplot/site-theme/starlight.css', './src/styles/brand.css', './src/styles/diagrams.css'],
+      // The family's type, layout and accent, then the diagrams' palette.
+      customCss: ['@agentplot/site-theme/starlight.css', './src/styles/diagrams.css'],
       social: [{ icon: 'github', label: 'GitHub', href: 'https://github.com/agentplot/headwater' }],
       editLink: { baseUrl: 'https://github.com/agentplot/headwater/edit/main/site/' },
       plugins: [starlightLinksValidator()],
