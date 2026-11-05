@@ -10,7 +10,7 @@ const steps: Record<string, [string, string]> = {
   H3: ['Walk through', 'the scenarios'],
   H4: ['Build', 'the core'],
   H5: ['Build', 'the lookups'],
-  H6: ['Build the', 'Flywheel plugin'],
+  H6: ['Build the', 'Boomdrive plugin'],
   H7: ['Build the Claude', 'Code and herdr plugins'],
 };
 type P = { id: string; x: number; y: number };
@@ -58,7 +58,7 @@ const svg = (wide: boolean) => {
   const note = wide
     ? `<text x="20" y="238" class="rm-note">H1 waits on the operator's rulings. Each later step needs the one before it; H5, H6 and H7 need only the core.</text>`
     : `<text x="20" y="20" class="rm-note">H1 waits on the operator's rulings.</text>`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="The steps in order: H1 amend the statement, H2 scaffold the repository, H3 walk through the scenarios, H4 build the core; then H5 the lookups, H6 the Flywheel plugin and H7 the Claude Code and herdr plugins, each needing only the core. H1 waits on the operator's rulings." class="rm"><rect width="${W}" height="${H}" rx="10" class="rm-bg"/>${[...lines, ...branch].map((d) => `<path d="${d}" class="rm-ln"/>`).join('')}${boxes}${note}</svg>`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" role="img" aria-label="The steps in order: H1 amend the statement, H2 scaffold the repository, H3 walk through the scenarios, H4 build the core; then H5 the lookups, H6 the Boomdrive plugin and H7 the Claude Code and herdr plugins, each needing only the core. H1 waits on the operator's rulings." class="rm"><rect width="${W}" height="${H}" rx="10" class="rm-bg"/>${[...lines, ...branch].map((d) => `<path d="${d}" class="rm-ln"/>`).join('')}${boxes}${note}</svg>`;
 };
 ---
 

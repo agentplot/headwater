@@ -42,7 +42,7 @@ change is theirs.
 
 One core answers four surfaces the same way: a command line, a Claude Code
 plugin, a herdr plugin with a sidebar of unread releases and a key that hands
-a release to an agent in its own worktree, and a Flywheel plugin whose adapter
+a release to an agent in its own worktree, and a Boomdrive plugin whose adapter
 hands each release to [millpond](https://github.com/agentplot/millpond), the
 inbox.
 
@@ -55,7 +55,7 @@ inbox.
 
 headwater is one of a family: millpond keeps the inbox, eddy lists recorded
 meetings, [sluice](https://github.com/agentplot/sluice) lands each change, and
-[Flywheel](https://github.com/agentplot/flywheel-web) runs the teams that make
+[Boomdrive](https://github.com/agentplot/boomdrive-web) runs the teams that make
 them. Its first user is swancloud, a NixOS fleet whose watch list names the
 tools it pins.
 

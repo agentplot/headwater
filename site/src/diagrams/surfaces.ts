@@ -1,6 +1,6 @@
 // How it fits: one core answers every surface with the same release under
 // the same name (headwater 10, 32, 33). Alone, a key in herdr starts an agent
-// in a worktree and sluice lands its bump; with an inbox, the Flywheel
+// in a worktree and sluice lands its bump; with an inbox, the Boomdrive
 // plugin hands the release to millpond, which keeps it once however often
 // it is reported. Either way the landed bump moves the pin, and the release
 // leaves every surface (9). The loop runs the two ways in turn. millpond is
@@ -19,7 +19,7 @@ interface Geo {
   W: number;
   H: number;
   core: Box;
-  surf: Box[]; // Claude Code, herdr, command line, Flywheel plugin
+  surf: Box[]; // Claude Code, herdr, command line, Boomdrive plugin
   agent: Box;
   pond: Box;
   sluice: Box;
@@ -165,7 +165,7 @@ export function surfacesSvg(layout: Layout): string {
   ]);
 
   // The surfaces, each told the same release under the same name.
-  const names = ['Claude Code', 'herdr', 'command line', 'Flywheel plugin'];
+  const names = ['Claude Code', 'herdr', 'command line', 'Boomdrive plugin'];
   g.surf.forEach((s, i) => {
     const lit = i === 1 ? 'litA' : i === 3 ? 'litB' : '';
     box(s, `surfbox ${lit}`, [`<text class="xs b" x="{x}" y="{y18}">${names[i]}</text>`]);
@@ -247,7 +247,7 @@ export function surfacesSvg(layout: Layout): string {
   );
   const title = 'One core, every surface: alone or feeding an inbox';
   const desc =
-    'headwater’s one core reports the release pkg:npm/react@19.2.1, and Claude Code, herdr, the command line and the Flywheel plugin each show it under that same name. Alone: a key in herdr starts an agent in its own worktree, which bumps react to 19.2.1, and sluice lands the bump. With an inbox: the Flywheel plugin hands the release to millpond under the key release/npm/react/19.2.1; a second scan reports it again under the same key and millpond keeps it once; the plan turns it into work, and sluice lands the bump. Either way the pin moves to 19.2.1 and the release leaves every surface.';
+    'headwater’s one core reports the release pkg:npm/react@19.2.1, and Claude Code, herdr, the command line and the Boomdrive plugin each show it under that same name. Alone: a key in herdr starts an agent in its own worktree, which bumps react to 19.2.1, and sluice lands the bump. With an inbox: the Boomdrive plugin hands the release to millpond under the key release/npm/react/19.2.1; a second scan reports it again under the same key and millpond keeps it once; the plan turns it into work, and sluice lands the bump. Either way the pin moves to 19.2.1 and the release leaves every surface.';
   const svg =
     `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${g.W} ${g.H}" class="root" role="img" aria-labelledby="ttl dsc">` +
     `<title id="ttl">${esc(title)}</title><desc id="dsc">${esc(desc)}</desc><style>${style}</style>` +
